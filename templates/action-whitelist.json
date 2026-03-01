@@ -1,0 +1,116 @@
+{
+  "_comment": "AAO Action Whitelist Template — store in immutable base partition",
+  "_version": "1.0",
+  "_documentation": "https://github.com/SkipperDon/aao-methodology/docs/03-action-layer.md",
+
+  "read_system_logs": {
+    "risk_level": "None",
+    "requires_user_confirmation": false,
+    "requires_snapshot": false,
+    "health_check_timeout_seconds": 0,
+    "parameters": {
+      "service_name": { "type": "string", "allowed_values": [] },
+      "lines": { "type": "integer", "min": 1, "max": 200, "default": 50 }
+    },
+    "description": "Read recent log entries for a named service",
+    "plain_language": "Read the last {lines} lines of {service_name} logs"
+  },
+
+  "read_service_status": {
+    "risk_level": "None",
+    "requires_user_confirmation": false,
+    "requires_snapshot": false,
+    "health_check_timeout_seconds": 0,
+    "parameters": {},
+    "description": "Check the running status of all managed services",
+    "plain_language": "Check which services are running"
+  },
+
+  "read_system_health": {
+    "risk_level": "None",
+    "requires_user_confirmation": false,
+    "requires_snapshot": false,
+    "health_check_timeout_seconds": 0,
+    "parameters": {},
+    "description": "Read CPU temperature, RAM usage, disk usage, network status",
+    "plain_language": "Check system health"
+  },
+
+  "restart_service": {
+    "risk_level": "Low",
+    "requires_user_confirmation": true,
+    "confirmation_method": "conversational",
+    "requires_snapshot": true,
+    "health_check_timeout_seconds": 60,
+    "parameters": {
+      "service_name": {
+        "type": "string",
+        "allowed_values": ["REPLACE_WITH_YOUR_SERVICE_NAMES"]
+      }
+    },
+    "description": "Restart a named managed service",
+    "plain_language": "Restart the {service_name} service (~30 seconds downtime)"
+  },
+
+  "clear_service_cache": {
+    "risk_level": "Low",
+    "requires_user_confirmation": true,
+    "confirmation_method": "conversational",
+    "requires_snapshot": true,
+    "health_check_timeout_seconds": 30,
+    "parameters": {
+      "service_name": {
+        "type": "string",
+        "allowed_values": ["REPLACE_WITH_YOUR_SERVICE_NAMES"]
+      }
+    },
+    "description": "Clear the cache for a named service",
+    "plain_language": "Clear the {service_name} cache"
+  },
+
+  "set_config_value": {
+    "risk_level": "Medium",
+    "requires_user_confirmation": true,
+    "confirmation_method": "dialog",
+    "requires_snapshot": true,
+    "health_check_timeout_seconds": 60,
+    "parameters": {
+      "key": {
+        "type": "string",
+        "allowed_values": ["REPLACE_WITH_YOUR_CONFIG_KEYS"]
+      },
+      "value": {
+        "type": "number",
+        "range_defined_in": "/opt/app/base/config-ranges.json"
+      }
+    },
+    "description": "Set a runtime configuration value within the permitted range",
+    "plain_language": "Change {key} from {current_value} to {value}"
+  },
+
+  "restore_snapshot": {
+    "risk_level": "Medium",
+    "requires_user_confirmation": true,
+    "confirmation_method": "dialog",
+    "requires_snapshot": false,
+    "health_check_timeout_seconds": 120,
+    "parameters": {
+      "snapshot_id": { "type": "string", "pattern": "^snap-[0-9]{14}-[a-f0-9]{8}$" }
+    },
+    "description": "Restore runtime configuration from a named snapshot",
+    "plain_language": "Restore the system to its state from {snapshot_id}"
+  },
+
+  "apply_signed_update": {
+    "risk_level": "High",
+    "requires_user_confirmation": true,
+    "confirmation_method": "pin",
+    "requires_snapshot": true,
+    "health_check_timeout_seconds": 300,
+    "parameters": {
+      "package_id": { "type": "string", "format": "uuid" }
+    },
+    "description": "Apply a signed update package from the update server",
+    "plain_language": "Install update {package_id}"
+  }
+}

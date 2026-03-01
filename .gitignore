@@ -1,0 +1,10 @@
+# AAO Repository — never commit these
+*.key
+*.pem
+private/
+secrets/
+.env
+*.log
+node_modules/
+__pycache__/
+.DS_Store
