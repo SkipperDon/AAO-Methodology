@@ -33,14 +33,30 @@ It answers one question that no existing framework addresses:
 
 ## The Problem AAO Solves
 
-An AI assistant that can read logs and diagnose problems is valuable. An AI assistant that can also apply fixes autonomously is transformative. But unrestricted AI action creates serious risk:
+AI systems taking real-world actions create **unprecedented risk**:
 
-- A misdiagnosis leads to a wrong fix that disables a critical system
-- The AI modifies something without a record — nobody knows what the system state is
-- A crafted prompt manipulates the AI into making changes the user did not intend  
-- The AI fixes one problem but creates another — with no snapshot, the previous state is gone
+### **The Deployment-Governance Gap**
 
-AAO solves this through **Controlled Autonomy** — a precisely defined action space, an immutable base that can never be corrupted, a complete audit trail of everything the AI does, and a snapshot system that always guarantees recovery.
+- **98% of organizations** (500+ employees) are deploying agentic AI<sup>[1](#ref1)</sup>
+- **79% lack formal security policies** for autonomous systems<sup>[1](#ref1)</sup>
+- **87% of AI agents lack safety documentation**<sup>[2](#ref2)</sup>
+- **97% have experienced AI-related security incidents**<sup>[3](#ref3)</sup>
+
+### **The Attack Reality**
+
+- **20-65% of prompt injection attacks succeed**<sup>[4](#ref4)</sup>
+- **90% of successful attacks leak sensitive data**<sup>[4](#ref4)</sup>
+- AI security incidents **increased 56.4% from 2023 to 2024**<sup>[5](#ref5)</sup>
+
+### **The Specific Risks**
+
+- **Prompt injection:** A crafted prompt manipulates the AI into executing unauthorized actions
+- **No audit trail:** When something breaks, you can't prove what the AI did
+- **Cascading failures:** One AI mistake triggers more automated "fixes" that compound the damage
+- **Permanent damage:** Without snapshots, the AI can irreversibly corrupt system state
+- **Regulatory non-compliance:** EU AI Act mandates strict oversight for autonomous systems — most organizations cannot demonstrate compliance
+
+AAO solves this through **Controlled Autonomy** — a precisely defined action space, an immutable base that cannot be corrupted, a complete audit trail of everything the AI does, snapshot-based recovery that prevents permanent damage, and structured governance that proves compliance.
 
 ---
 
@@ -255,4 +271,18 @@ If you have found this repository and want to discuss the methodology before pub
 
 ---
 
-*AAO — Because AI that acts in the real world needs more than a good prompt.*
+## References
+
+<a name="ref1"></a>**[1]** Enterprise Management Associates (December 2025). "AI Agent Attacks in Q4 2025 Signal New Risks for 2026." [eSecurity Planet](https://www.esecurityplanet.com/artificial-intelligence/ai-agent-attacks-in-q4-2025-signal-new-risks-for-2026/)
+
+<a name="ref2"></a>**[2]** MIT CSAIL (2025). "AI Agent Index 2025." [GitHub Gist](https://gist.github.com/afrexai-cto/35458bfd833779e61e3ccfd8da802712)
+
+<a name="ref3"></a>**[3]** Pacific AI & Knostic (2025). "AI Governance Statistics and Trends of 2025." [Knostic AI Blog](https://www.knostic.ai/blog/ai-governance-statistics)
+
+<a name="ref4"></a>**[4]** Pillar Security & Palo Alto Unit 42 (2025). "Prompt Injection Attacks: State of Attacks on GenAI." [Obsidian Security Blog](https://www.obsidiansecurity.com/blog/prompt-injection)
+
+<a name="ref5"></a>**[5]** Stanford HAI (2025). "2025 AI Index Report." [CSO Online](https://www.csoonline.com/article/4111384/top-5-real-world-ai-security-threats-revealed-in-2025.html)
+
+---
+
+*AAO — Because AI that acts in the real world needs more than a good prompt. It needs structural risk mitigation.* ⚓
