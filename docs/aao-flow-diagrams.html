@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAO — Flow Diagrams & Architecture</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.1/mermaid.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg:        #0a0c10;
+    --surface:   #111318;
+    --border:    #1e2330;
+    --accent:    #00d4aa;
+    --accent2:   #ff6b35;
+    --accent3:   #4a9eff;
+    --text:      #c8cdd8;
+    --muted:     #5a6070;
+    --heading:   #eef0f5;
+    --warn:      #f5c842;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 4rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,170,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: 0.05em;
+    color: var(--heading);
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+  header p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    max-width: 600px;
+  }
+  .disclaimer {
+    margin-top: 1.5rem;
+    padding: 0.75rem 1.25rem;
+    border-left: 3px solid var(--warn);
+    background: rgba(245,200,66,0.05);
+    font-size: 0.8rem;
+    color: var(--warn);
+    font-family: 'IBM Plex Mono', monospace;
+    max-width: 700px;
+  }
+
+  /* ── NAV ── */
+  nav {
+    padding: 1.25rem 4rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  nav a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+  nav a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(0,212,170,0.05);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 4rem 6rem;
+  }
+
+  /* ── SECTION ── */
+  .diagram-section {
+    margin-bottom: 5rem;
+    scroll-margin-top: 5rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.06em;
+    color: var(--heading);
+  }
+  .section-desc {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin-bottom: 1.75rem;
+    max-width: 700px;
+    border-left: 2px solid var(--border);
+    padding-left: 1rem;
+  }
+
+  /* ── DIAGRAM CARD ── */
+  .diagram-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .diagram-card-header {
+    padding: 0.85rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .diagram-card-header .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-green  { background: var(--accent); }
+  .dot-orange { background: var(--accent2); }
+  .dot-blue   { background: var(--accent3); }
+  .dot-yellow { background: var(--warn); }
+
+  .diagram-card-header span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .diagram-body {
+    padding: 2rem 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram-body .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    margin-top: 1rem;
+    padding: 0.875rem 1.5rem;
+    border-top: 1px solid var(--border);
+    background: rgba(0,0,0,0.2);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .legend-box {
+    width: 14px; height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  /* ── DIVIDER ── */
+  hr.section-rule {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 5rem 0;
+  }
+
+  /* ── MERMAID THEMING ── */
+  .mermaid svg { max-width: 100%; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  footer span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  footer .anchor { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">AAO — Autonomous Action Operating Methodology</div>
+  <h1>Flow Diagrams &amp; Architecture</h1>
+  <p>Visual documentation of all key workflows, processes, and architectural boundaries. Read alongside the specification and docs folder.</p>
+  <div class="disclaimer">
+    ⚠ DISCLAIMER — This framework is under active development and has not been formally tested or validated.
+    Not a finalized standard. Apply professional judgment before adoption.
+  </div>
+</header>
+
+<nav>
+  <a href="#arch">Architecture</a>
+  <a href="#action">Action Flow</a>
+  <a href="#session">Session Lifecycle</a>
+  <a href="#signoff">Sign-Off Workflow</a>
+  <a href="#rollback">Rollback</a>
+  <a href="#injection">Prompt Injection</a>
+  <a href="#deployment">Deployment Auth</a>
+  <a href="#sdlc">SDLC</a>
+  <a href="#failure">Failure Intelligence</a>
+</nav>
+
+<main>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 1. FOUR-LAYER ARCHITECTURE                          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="arch">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Four-Layer Architecture</span>
+    </div>
+    <p class="section-desc">
+      The foundational structure of every AAO system. The AI can see everything but can only touch what it is explicitly permitted to touch. Each layer has a precise scope — crossing boundaries requires passing through the layer above.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-green"></span>
+        <span>ARCHITECTURE — Layer boundaries and data flow</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+graph TB
+    subgraph L4["LAYER 4 — AI Conversation Layer (Claude / LLM)"]
+        AI["🤖 AI Model\nDiagnoses · Proposes · Explains\nCannot execute anything directly"]
+    end
+
+    subgraph L3["LAYER 3 — AI Action Layer ← Critical Boundary"]
+        VAL["Action Validator\nChecks whitelist · Validates request"]
+        SNAP["Snapshot Engine\nCaptures state before execution"]
+        EXEC["Executor\nRuns named action functions only"]
+        HEALTH["Health Check\nVerifies system post-action"]
+        LOG["Audit Ledger\nAppend-only · Everything logged"]
+        ROLL["Rollback Engine\nRestores snapshot on failure"]
+    end
+
+    subgraph L2["LAYER 2 — Runtime Layer (Sandboxed AI Access)"]
+        CONFIG["Configuration"]
+        SERVICES["Services"]
+        CACHE["Cache"]
+        LOGS["Logs"]
+    end
+
+    subgraph L1["LAYER 1 — Immutable Base (Read-Only · Never Touched)"]
+        CODE["Application Code"]
+        WL["Action Whitelist"]
+        KEYS["Signing Keys"]
+        SCRIPTS["Control Scripts"]
+    end
+
+    AI -->|"Named action request\n(no shell commands)"| VAL
+    VAL -->|"Whitelist check"| WL
+    VAL -->|"Approved"| SNAP
+    SNAP -->|"Capture runtime state"| L2
+    SNAP -->|"Execute"| EXEC
+    EXEC -->|"Modify within scope"| L2
+    EXEC -->|"Log action + result"| LOG
+    EXEC -->|"Trigger"| HEALTH
+    HEALTH -->|"Pass"| LOG
+    HEALTH -->|"Fail"| ROLL
+    ROLL -->|"Restore snapshot"| L2
+    ROLL -->|"Log rollback"| LOG
+    VAL -->|"Rejected — log only"| LOG
+
+    classDef l4style fill:#0d2a24,stroke:#00d4aa,color:#00d4aa,rx:4
+    classDef l3style fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff,rx:4
+    classDef l2style fill:#1a1a0d,stroke:#f5c842,color:#f5c842,rx:4
+    classDef l1style fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35,rx:4
+    classDef nodeStyle fill:#111318,stroke:#1e2330,color:#c8cdd8,rx:4
+
+    class AI l4style
+    class VAL,SNAP,EXEC,HEALTH,LOG,ROLL l3style
+    class CONFIG,SERVICES,CACHE,LOGS l2style
+    class CODE,WL,KEYS,SCRIPTS l1style
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box" style="background:#00d4aa"></div>Layer 4 — AI Conversation (free to reason)</div>
+        <div class="legend-item"><div class="legend-box" style="background:#4a9eff"></div>Layer 3 — Action Layer (the critical boundary)</div>
+        <div class="legend-item"><div class="legend-box" style="background:#f5c842"></div>Layer 2 — Runtime (sandboxed AI access)</div>
+        <div class="legend-item"><div class="legend-box" style="background:#ff6b35"></div>Layer 1 — Immutable Base (read-only, never touched)</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 2. ACTION FLOW                                       -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="action">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Action Execution Flow</span>
+    </div>
+    <p class="section-desc">
+      Every action the AI requests follows this exact path through the Action Layer. Risk level determines the confirmation requirement. No action bypasses this flow — not even the AI system itself can shortcut it.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-blue"></span>
+        <span>ACTION FLOW — From AI request to execution and outcome</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart TD
+    START(["AI requests action by name"])
+    WLC{"On whitelist?"}
+    REJECT["❌ Reject\nLog attempt\nReturn error to AI"]
+    RISK{"Risk level?"}
+
+    INFO["Proceed\n(Info — no confirmation)"]
+    LOW["Log intent\nProceed\n(Low)"]
+    MED["🔔 Request operator\nconfirmation\n(Medium)"]
+    HIGH["🔐 Require explicit\nacknowledgment\n+ credential\n(High)"]
+
+    CONFIRM{"Operator\nconfirms?"}
+    TIMEOUT["⏱ Timeout\nLog and abort"]
+
+    SNAP["📸 Take snapshot\nof runtime state"]
+    EXEC["▶ Execute\nwhitelisted action"]
+    HC{"Health check\npasses?"}
+    SUCCESS["✅ Log success\nReturn result to AI"]
+    FAIL["❌ Health check failed\nTrigger auto-rollback"]
+    RESTORE["♻ Restore snapshot\nLog rollback event"]
+    ALERT["🚨 Alert operator\nSession Summary flagged"]
+
+    START --> WLC
+    WLC -->|No| REJECT
+    WLC -->|Yes| RISK
+    RISK -->|Info| INFO --> SNAP
+    RISK -->|Low| LOW --> SNAP
+    RISK -->|Medium| MED --> CONFIRM
+    RISK -->|High| HIGH --> CONFIRM
+    CONFIRM -->|Yes| SNAP
+    CONFIRM -->|No / Timeout| TIMEOUT
+    SNAP --> EXEC
+    EXEC --> HC
+    HC -->|Pass| SUCCESS
+    HC -->|Fail| FAIL --> RESTORE --> ALERT
+
+    style START fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style SUCCESS fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style REJECT fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style FAIL fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style RESTORE fill:#1a1a0d,stroke:#f5c842,color:#f5c842
+    style ALERT fill:#1a1a0d,stroke:#f5c842,color:#f5c842
+    style TIMEOUT fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style MED fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style HIGH fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style SNAP fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 3. SESSION LIFECYCLE                                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="session">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Session Lifecycle</span>
+    </div>
+    <p class="section-desc">
+      An AAO session begins when an operator initiates AI-assisted work and ends when the operator signs off the Session Summary. Nothing is considered complete — and no session is formally closed — until a named individual with an Authorization Code has reviewed and accepted the session's output.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-green"></span>
+        <span>SESSION LIFECYCLE — From initiation to sign-off and audit</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+stateDiagram-v2
+    [*] --> Active : Operator initiates session
+
+    state Active {
+        [*] --> Diagnosing
+        Diagnosing --> Proposing : AI completes analysis
+        Proposing --> AwaitingConfirm : Medium/High action proposed
+        AwaitingConfirm --> Executing : Operator confirms
+        AwaitingConfirm --> Proposing : Operator declines
+        Executing --> Diagnosing : Action complete, continue
+        Executing --> Rollback : Health check failed
+        Rollback --> Diagnosing : Rollback complete
+    }
+
+    Active --> PendingReview : Session ends\nSystem generates Session Summary
+
+    state PendingReview {
+        [*] --> AwaitingOperator
+        AwaitingOperator --> Reviewing : Operator opens summary
+        Reviewing --> PartialApproval : Selective review
+        PartialApproval --> Reviewing : Continue review
+    }
+
+    PendingReview --> Overdue : Grace period expires\nwithout sign-off
+
+    state Overdue {
+        [*] --> EscalationTriggered
+        EscalationTriggered --> AdminNotified
+    }
+
+    PendingReview --> Closed : All artifacts approved\nAuthorization Code entered
+    Overdue --> Closed : Late sign-off completed\nNote recorded
+    PendingReview --> Flagged : Artifact rejected\nMandatory note entered
+
+    state Flagged {
+        [*] --> ResponseWorkflow
+        ResponseWorkflow --> Remediated : Issue addressed
+    }
+
+    Flagged --> Closed : Remediation signed off
+    Closed --> [*] : Immutable record\nin Artifact Repository
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 4. SIGN-OFF WORKFLOW                                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="signoff">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Human Sign-Off Workflow</span>
+    </div>
+    <p class="section-desc">
+      The sign-off workflow is the human accountability mechanism at the heart of AAO. Every consequential AI output must be reviewed and signed by a named individual using their Authorization Code before it becomes an organizational record. This is where process enforces trust.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-orange"></span>
+        <span>SIGN-OFF — End-of-session review and artifact authorization</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+sequenceDiagram
+    participant AI as 🤖 AI System
+    participant SYS as ⚙ AAO System
+    participant OPS as 👤 Operator
+    participant REPO as 🗄 Artifact Repository
+    participant AUTH as 🔐 Auth Service
+
+    AI->>SYS: Session work complete
+    SYS->>REPO: Store all session artifacts (pending)
+    SYS->>SYS: Generate Session Summary Artifact
+    SYS->>REPO: Store Session Summary (pending)
+    SYS->>OPS: Notify: session ready for review
+
+    OPS->>SYS: Open Session Summary
+    SYS->>OPS: Display: actions taken, artifacts produced, anomalies
+
+    loop For each artifact
+        OPS->>OPS: Review artifact content
+        alt Approve
+            OPS->>AUTH: Enter Authorization Code
+            AUTH->>AUTH: Verify code hash against operator record
+            AUTH->>SYS: ✅ Verified — operator identity confirmed
+            SYS->>REPO: Record sign-off (operator ID, timestamp, code hash)
+            REPO->>REPO: Update artifact status → Approved (immutable)
+        else Reject
+            OPS->>SYS: Enter rejection + mandatory note
+            SYS->>REPO: Record rejection (operator ID, note, timestamp)
+            SYS->>SYS: Trigger rejection response workflow
+        else Flag for follow-up
+            OPS->>SYS: Flag artifact
+            SYS->>REPO: Record flag (operator ID, timestamp)
+            SYS->>OPS: Set follow-up reminder
+        end
+    end
+
+    SYS->>SYS: All artifacts resolved?
+    SYS->>REPO: Close session (immutable record)
+    SYS->>OPS: Session closed confirmation
+
+    Note over REPO: Complete audit trail available<br/>at any time without preparation
+        </div>
+      </div>
+    </div>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-orange"></span>
+        <span>AUTHORIZATION CODE — Issuance and use lifecycle</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart LR
+    ISSUE["Admin issues\nAuthorization Code\nto operator"]
+    VERIFY["Competency\nverified?"]
+    DENY["❌ Code not issued\nTraining required"]
+    HASH["Code hashed\n(bcrypt/Argon2)\nwith per-operator salt"]
+    STORE["Hash stored\nPlaintext discarded\nOperator record created"]
+    USE["Operator enters\ncode at sign-off"]
+    COMPARE["System compares\nhash of entered code\nvs stored hash"]
+    MATCH{"Match?"}
+    RECORD["✅ Sign-off recorded\nOperator identity\nTimestamp\nArtifact ID"]
+    FAIL["❌ Failed attempt\nLogged with IP\nOperator notified"]
+    ROTATE["90-day rotation\nor on compromise"]
+    HISTORY["Old hash moved\nto code history table\nPrior sign-offs intact"]
+
+    ISSUE --> VERIFY
+    VERIFY -->|No| DENY
+    VERIFY -->|Yes| HASH --> STORE
+    STORE --> USE --> COMPARE --> MATCH
+    MATCH -->|Yes| RECORD
+    MATCH -->|No| FAIL
+    STORE --> ROTATE --> HISTORY
+
+    style RECORD fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style DENY fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style FAIL fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style HASH fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 5. SNAPSHOT & ROLLBACK                              -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="rollback">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Snapshot &amp; Rollback</span>
+    </div>
+    <p class="section-desc">
+      Before every consequential action, AAO captures a point-in-time snapshot of runtime state. If the post-action health check fails, rollback is automatic — no human intervention required. The system always returns to a known good state.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-yellow"></span>
+        <span>SNAPSHOT / ROLLBACK — State management and recovery</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+sequenceDiagram
+    participant AL as ⚙ Action Layer
+    participant RT as 💾 Runtime Layer
+    participant SNAP as 📸 Snapshot Engine
+    participant HC as 🩺 Health Check
+    participant ROLL as ♻ Rollback Engine
+    participant LOG as 📋 Audit Ledger
+
+    AL->>SNAP: Pre-action snapshot request
+    SNAP->>RT: Capture runtime state
+    RT-->>SNAP: State captured
+    SNAP->>LOG: Log: snapshot taken (ID, timestamp, pre-action state hash)
+    SNAP-->>AL: Snapshot confirmed
+
+    AL->>RT: Execute action
+    RT-->>AL: Action complete
+
+    AL->>HC: Trigger health check
+    HC->>RT: Verify all expected components running
+    RT-->>HC: Component status report
+
+    alt All components healthy
+        HC-->>AL: ✅ Health check passed
+        AL->>LOG: Log: action success + post-state hash
+        Note over AL,LOG: Snapshot retained per retention policy
+    else Component failure detected
+        HC-->>AL: ❌ Health check failed
+        AL->>LOG: Log: health check failure details
+        AL->>ROLL: Trigger rollback
+        ROLL->>RT: Restore from snapshot
+        RT-->>ROLL: Restore complete
+        ROLL->>HC: Re-run health check
+        HC-->>ROLL: ✅ Baseline restored
+        ROLL->>LOG: Log: rollback complete (snapshot ID, duration)
+        ROLL->>AL: Rollback successful — alert operator
+    end
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 6. PROMPT INJECTION DEFENCE                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="injection">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Prompt Injection Defence</span>
+    </div>
+    <p class="section-desc">
+      Prompt injection is the primary attack vector for AI systems with real-world action capability. AAO's defence is structural — even a perfectly crafted injection cannot request an action that doesn't exist on the whitelist, because the whitelist is on the immutable base.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-orange"></span>
+        <span>PROMPT INJECTION — Attack path and structural defences</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart TD
+    ATTACK["🎯 Attacker\ncrafts malicious input\n(log data, sensor output,\nuser message, etc.)"]
+
+    LAYER4["LAYER 4 — AI processes input\nMay be successfully manipulated\ninto requesting harmful action"]
+
+    BOUNDARY["⚡ LAYER 3 BOUNDARY\nFirst structural defence"]
+
+    WL_CHECK{"Action name\non whitelist?"}
+
+    NOT_EXIST["❌ Action does not exist\nRejected — cannot be\ncreated at runtime\nLogged as anomaly"]
+
+    EXISTS["Action exists on whitelist"]
+
+    SCOPE_CHECK{"Parameters\nwithin defined scope?"}
+
+    OUT_SCOPE["❌ Parameters rejected\nScope validation failed\nLogged as anomaly"]
+
+    RISK_CHECK{"Risk level\nrequires confirmation?"}
+
+    AUTO_EXEC["Execute\n(Info/Low — no confirmation\nrequired for this risk level)"]
+
+    CONFIRM_REQ["🔔 Operator confirmation\nrequired before execution\nOperator can detect\nand reject injection"]
+
+    OPERATOR{"Operator\nrecognizes injection?"}
+
+    BLOCKED["✅ Operator blocks\nMalicious action stopped\nIncident logged"]
+
+    EXECUTES["Action executes\n(legitimate or injected)\nFull audit trail created"]
+
+    SNAP_LOG["📸 Snapshot taken before\n♻ Rollback available after\n📋 Complete audit trail"]
+
+    ATTACK --> LAYER4 --> BOUNDARY --> WL_CHECK
+    WL_CHECK -->|"No"| NOT_EXIST
+    WL_CHECK -->|"Yes"| EXISTS --> SCOPE_CHECK
+    SCOPE_CHECK -->|"No"| OUT_SCOPE
+    SCOPE_CHECK -->|"Yes"| RISK_CHECK
+    RISK_CHECK -->|"Info/Low"| AUTO_EXEC --> SNAP_LOG
+    RISK_CHECK -->|"Medium/High"| CONFIRM_REQ --> OPERATOR
+    OPERATOR -->|"Yes — injection detected"| BLOCKED
+    OPERATOR -->|"No — injection undetected"| EXECUTES --> SNAP_LOG
+
+    style NOT_EXIST fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style OUT_SCOPE fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style BLOCKED fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style ATTACK fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style LAYER4 fill:#1a1a0d,stroke:#f5c842,color:#f5c842
+    style BOUNDARY fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box" style="background:#00d4aa"></div>Structurally blocked — architecturally impossible</div>
+        <div class="legend-item"><div class="legend-box" style="background:#f5c842"></div>AI may be manipulated but cannot act without Layer 3</div>
+        <div class="legend-item"><div class="legend-box" style="background:#4a9eff"></div>The critical structural boundary</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 7. DEPLOYMENT AUTHORIZATION PROCESS                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="deployment">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <span class="section-title">Deployment Authorization Process</span>
+    </div>
+    <p class="section-desc">
+      Before an AAO system operates in production, organizational authority must sign a Deployment Authorization Document. This is a one-time act of accountability — a named executive accepts responsibility for the system and authorizes it to run. Everything after this is governed by the process.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-yellow"></span>
+        <span>DEPLOYMENT AUTH — From design to authorized operation</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart TD
+    subgraph DESIGN["DESIGN PHASE"]
+        D1["Define system purpose\nand deployment scope"]
+        D2["Design action whitelist\n(each action gets risk level)"]
+        D3["Build and test\nLayers 1–3 first\nbefore integrating AI"]
+    end
+
+    subgraph ASSESS["RISK ASSESSMENT PHASE"]
+        R1["Complete Risk Register\n7 standard categories\n+ deployment-specific risks"]
+        R2["Document pre-control\nand post-control ratings"]
+        R3["Named individuals\naccept residual risks"]
+    end
+
+    subgraph AUTH["AUTHORIZATION PHASE"]
+        A1["Complete Deployment\nAuthorization Document"]
+        A2["Operator Registry\nCompetency verification\nCode issuance"]
+        A3["Executive authority\nreviews DAD + Risk Register"]
+        A4["Authority signs off\nwith Authorization Code\nImmutable record created"]
+    end
+
+    subgraph OPERATE["OPERATION"]
+        O1["System operates\nwithin authorized scope"]
+        O2["Every session produces\nartifacts for sign-off"]
+        O3["Failure Intelligence\ncollects operational data"]
+    end
+
+    subgraph REVIEW["PERIODIC REVIEW"]
+        REV1["Trigger: schedule\nor scope change\nor risk event"]
+        REV2["Review Artifact Repository\nand Failure Intelligence data"]
+        REV3["Update Risk Register\nif needed"]
+        REV4["New DAD signed off\nby authority"]
+    end
+
+    DESIGN --> ASSESS --> AUTH --> OPERATE --> REVIEW
+    REVIEW -->|"Updated authorization"| OPERATE
+
+    D1 --> D2 --> D3
+    R1 --> R2 --> R3
+    A1 --> A2 --> A3 --> A4
+    O1 --> O2 --> O3
+    REV1 --> REV2 --> REV3 --> REV4
+
+    style A4 fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style REV4 fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 8. SDLC INTEGRATION                                  -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="sdlc">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <span class="section-title">SDLC Integration</span>
+    </div>
+    <p class="section-desc">
+      AAO extends each stage of the software development lifecycle. New activities at each stage are highlighted — these are what AAO adds on top of standard development practice.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-blue"></span>
+        <span>SDLC — Standard stages extended with AAO requirements</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart LR
+    subgraph PLAN["PLAN"]
+        P1["Feature requirements"]
+        P2["⊕ Action boundary\nassessment\nWhitelist entries needed?"]
+    end
+
+    subgraph DESIGN["DESIGN"]
+        D1["Component architecture"]
+        D2["⊕ Partition classification\nBase or runtime?"]
+        D3["⊕ Risk level\nassignment per action"]
+    end
+
+    subgraph DEV["DEVELOP"]
+        DV1["Code + commit"]
+        DV2["⊕ Release Package\nManifest\nPartition · rollback notes"]
+        DV3["⊕ Build Layer 3\nbefore integrating AI"]
+    end
+
+    subgraph TEST["TEST"]
+        T1["Functional · regression"]
+        T2["⊕ Whitelist boundary test"]
+        T3["⊕ Prompt injection test"]
+        T4["⊕ Rollback test"]
+        T5["⊕ Partition integrity test"]
+    end
+
+    subgraph DEPLOY["DEPLOY"]
+        DP1["Push to production"]
+        DP2["⊕ Signed package\nverification"]
+        DP3["⊕ Staged rollout\n+ auto health check"]
+        DP4["⊕ DAD sign-off\nbefore go-live"]
+    end
+
+    subgraph MAINTAIN["MAINTAIN"]
+        M1["Reactive support"]
+        M2["⊕ Self-healing\nwithin sandbox"]
+        M3["⊕ Failure Intelligence\nfeedback loop"]
+    end
+
+    PLAN --> DESIGN --> DEV --> TEST --> DEPLOY --> MAINTAIN
+    MAINTAIN -->|"Intelligence feeds\nnext cycle"| PLAN
+
+    style P2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style D2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style D3 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DV2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DV3 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style T2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style T3 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style T4 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style T5 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DP2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DP3 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DP4 fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style M2 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style M3 fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-box" style="background:#4a9eff"></div>⊕ AAO addition to standard SDLC practice</div>
+        <div class="legend-item"><div class="legend-box" style="background:#00d4aa"></div>DAD sign-off — organizational authority required</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 9. FAILURE INTELLIGENCE LOOP                        -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <section class="diagram-section" id="failure">
+    <div class="section-header">
+      <span class="section-num">09</span>
+      <span class="section-title">Failure Intelligence Loop</span>
+    </div>
+    <p class="section-desc">
+      AAO systems learn from production failures. Every failure is captured, analyzed for patterns, and fed back into the development cycle automatically. The difference between monitoring and intelligence is the feedback loop.
+    </p>
+
+    <div class="diagram-card">
+      <div class="diagram-card-header">
+        <span class="dot dot-green"></span>
+        <span>FAILURE INTELLIGENCE — From production failure to development priority</span>
+      </div>
+      <div class="diagram-body">
+        <div class="mermaid">
+flowchart TD
+    FAIL["❌ Production failure\nor health check event"]
+    CAPTURE["System captures:\nWhat the AI diagnosed\nWhat action was taken\nWhat failed\nWhat rollback did\nWhether rollback held"]
+
+    LOG["📋 Failure record\nstored in Audit Ledger\nas FAILURE_REPORT artifact"]
+
+    SIGN["👤 Operator reviews\nFAILURE_REPORT\nSigns off with Auth Code"]
+
+    LOCAL["Local pattern\nanalysis\nIs this a known pattern?"]
+
+    KNOWN{"Known failure\npattern?"}
+
+    SELFHEAL["♻ Attempt self-healing\nwithin Action Layer sandbox\nusing known fix"]
+
+    HELD{"Fix held?\nHealth check passes?"}
+
+    RESOLVED["✅ Resolved\nLog resolution\nPattern confidence increased"]
+
+    UNKNOWN["New failure pattern\nEscalate to operator\nCreate development ticket"]
+
+    CENTRAL["📡 Anonymized record\ncontributed to central\nfailure intelligence DB\n(if opted in)"]
+
+    PATTERNS["Pattern analysis\nacross fleet\nSystemic issues identified"]
+
+    DEVQUEUE["🛠 Development priority\nqueued for next cycle"]
+
+    WHITELIST["Whitelist updated\nor new action added\nvia signed update package"]
+
+    FAIL --> CAPTURE --> LOG --> SIGN --> LOCAL --> KNOWN
+    KNOWN -->|"Yes"| SELFHEAL --> HELD
+    HELD -->|"Yes"| RESOLVED --> CENTRAL
+    HELD -->|"No"| UNKNOWN
+    KNOWN -->|"No"| UNKNOWN --> CENTRAL
+    CENTRAL --> PATTERNS --> DEVQUEUE --> WHITELIST
+    WHITELIST -->|"Deployed via\nsigned update"| RESOLVED
+
+    style FAIL fill:#2a0d0d,stroke:#ff6b35,color:#ff6b35
+    style RESOLVED fill:#0d2a24,stroke:#00d4aa,color:#00d4aa
+    style SELFHEAL fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style CENTRAL fill:#0d1a2a,stroke:#4a9eff,color:#4a9eff
+    style DEVQUEUE fill:#1a1a0d,stroke:#f5c842,color:#f5c842
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>AAO Flow Diagrams v1.0 — © 2026 Donald Moskaluk <span class="anchor">⚓</span> AtMyBoat.com</span>
+  <span>NIST AI RMF 1.0 Aligned · EU AI Act 2024 Aligned · Framework Under Development</span>
+</footer>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    themeVariables: {
+      primaryColor:       '#0d1a2a',
+      primaryTextColor:   '#c8cdd8',
+      primaryBorderColor: '#1e2330',
+      lineColor:          '#4a9eff',
+      secondaryColor:     '#111318',
+      tertiaryColor:      '#0a0c10',
+      background:         '#0a0c10',
+      mainBkg:            '#111318',
+      nodeBkg:            '#111318',
+      nodeBorder:         '#1e2330',
+      clusterBkg:         '#111318',
+      clusterBorder:      '#1e2330',
+      titleColor:         '#c8cdd8',
+      edgeLabelBackground:'#111318',
+      fontSize:           '13px',
+    },
+    flowchart: { curve: 'basis', padding: 20 },
+    sequence:  { mirrorActors: false, messageAlign: 'center' },
+  });
+</script>
+
+</body>
+</html>
