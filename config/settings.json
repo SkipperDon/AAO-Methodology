@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Read(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git push *)",
+      "Bash(gh pr create*)",
+      "Bash(gh pr merge*)",
+      "Bash(git push --force*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[AAO PRE-ACTION] Tool: '$CLAUDE_TOOL_NAME' | Path: '$CLAUDE_TOOL_INPUT_PATH' — verify this is within stated task scope before proceeding' >&2"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/boatiq && python3 -c \"import subprocess; r = subprocess.run(['ruff', 'check', '.'], capture_output=True, text=True); print(r.stdout) if r.returncode != 0 else None\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[AAO SESSION CLOSE] Has the AAO compliance checklist been completed? SESSION_LOG.md updated?' >&2"
+          }
+        ]
+      }
+    ]
+  }
+}
