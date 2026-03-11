@@ -10,6 +10,8 @@
 
 **A structured framework for building AI systems that take real-world actions safely.**
 
+**Live site:** https://skipperdon.github.io/AAO-Methodology/
+
 ---
 
 > *"The question is not whether to give AI systems real-world action capability.  
@@ -261,10 +263,11 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 
 ## Status
 
-**Current version:** 1.0 (Private — pre-publication)  
-**Reference implementation:** d3kOS v2.x  
-**License:** Apache 2.0  
-**Publication:** Ready for public release  
+**Current version:** 1.0
+**Live site:** https://skipperdon.github.io/AAO-Methodology/
+**Reference implementation:** d3kOS v2.x
+**License:** Apache 2.0
+**Publication:** Live
 
 ---
 
