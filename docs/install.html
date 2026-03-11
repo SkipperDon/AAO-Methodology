@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Install — AAO Methodology</title>
+<meta name="description" content="Step-by-step installation guide for AAO Methodology across Claude Code, ChatGPT, Gemini, Cursor, and GitHub Copilot.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  html, body { background: var(--navy); color: var(--text); font-family: 'Inter', sans-serif; }
+  .spec-box {
+    background: var(--navy2); border: 1px solid var(--border);
+    border-left: 4px solid var(--teal); padding: 28px 32px; margin-bottom: 48px;
+  }
+  .spec-box h2 { font-family:'Bebas Neue',sans-serif; font-size:1.6rem; letter-spacing:2px; margin-bottom:12px; color:var(--teal); }
+  .spec-box p { font-size:15px; color:var(--slate); line-height:1.75; margin-bottom:12px; }
+  .spec-box ul { list-style:none; margin-top:16px; display:flex; flex-direction:column; gap:10px; }
+  .spec-box li {
+    display:flex; align-items:flex-start; gap:12px;
+    font-size:14px; color:var(--slate); line-height:1.65;
+  }
+  .spec-box li::before { content:'→'; color:var(--teal); font-family:'Space Mono',monospace; font-size:13px; flex-shrink:0; margin-top:1px; }
+  .spec-box strong { color:var(--text); }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="index.html" aria-label="AAO Methodology home">
+    AAO Methodology <span class="v-badge">v1.0</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="install.html" aria-current="page">Install</a></li>
+    <li><a href="red-flags.html">Red Flags</a></li>
+    <li><a href="commands.html">Commands</a></li>
+    <li><a href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+  <a class="nav-cta" href="install.html">Get Started</a>
+</nav>
+
+<main id="main">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="glow-orb" style="width:500px;height:500px;background:rgba(0,229,195,0.07);top:-150px;right:-80px;" aria-hidden="true"></div>
+    <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;">
+      <p class="kicker">// Installation guide</p>
+      <h1 class="hero-title">Install AAO<br><span class="teal">Methodology</span></h1>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="hero-sub">Pick your AI tool. Follow the steps. Run your first structured session in under an hour.</p>
+    </div>
+  </header>
+
+  <div class="section" style="padding-bottom:0;">
+    <div style="max-width:1100px;margin:0 auto;">
+
+      <!-- WHAT IS THE SPEC -->
+      <div class="spec-box reveal">
+        <h2>What Is the Specification?</h2>
+        <p>
+          The AAO Methodology specification is a plain-text instruction file you place inside your project. Your AI assistant reads it at the start of every session and commits to following its rules before doing any work.
+        </p>
+        <p>
+          Think of it as an employment contract between you and your AI. It defines exactly how the AI must behave: what it must declare before touching files, when it must stop, how it must close a session, and what it is never allowed to do.
+        </p>
+        <ul role="list">
+          <li><strong>CLAUDE.md</strong> — the instruction file for Claude Code. Placed in your project root, it is read automatically at the start of every session.</li>
+          <li><strong>adapters/</strong> — pre-formatted versions of the same rules for ChatGPT, Gemini, Cursor, and GitHub Copilot. Same content, adapted to each tool's input method.</li>
+          <li><strong>SESSION_LOG.md</strong> — a template for your session log. Updated at every <code style="color:var(--teal);font-size:13px;">/session-close</code>. Gives you a full audit trail of every AI session.</li>
+          <li><strong>REMEDIATION_GUIDE.md</strong> — what to do when a red flag fires. Stop, revert, understand, add a rule. Step by step.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <hr class="rule">
+
+  <!-- TOOL TABS -->
+  <section class="section" aria-labelledby="install-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Pick your tool</p>
+      <h2 class="section-title" id="install-heading">Step-by-Step <span style="color:var(--teal)">Setup</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+    </div>
+
+    <div class="reveal" style="transition-delay:0.1s">
+      <div class="tab-row" role="tablist" aria-label="AI tool installation guides">
+        <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-claude" onclick="switchTab('claude',this)"><span class="tab-dot" style="background:var(--amber)" aria-hidden="true"></span>Claude Code</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-chatgpt" onclick="switchTab('chatgpt',this)"><span class="tab-dot" style="background:#19c37d" aria-hidden="true"></span>ChatGPT</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-gemini" onclick="switchTab('gemini',this)"><span class="tab-dot" style="background:var(--blue)" aria-hidden="true"></span>Gemini</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-cursor" onclick="switchTab('cursor',this)"><span class="tab-dot" style="background:#b197fc" aria-hidden="true"></span>Cursor</button>
+        <button class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-copilot" onclick="switchTab('copilot',this)"><span class="tab-dot" style="background:var(--teal)" aria-hidden="true"></span>GitHub Copilot</button>
+      </div>
+
+      <!-- CLAUDE CODE -->
+      <div class="tab-panel active" id="panel-claude" role="tabpanel" aria-label="Claude Code installation">
+        <div class="install-card">
+          <div class="install-header">
+            <div class="ai-name">Claude Code</div>
+            <span class="ai-badge" style="color:var(--amber);border-color:var(--amber)">Recommended</span>
+          </div>
+          <div class="install-steps">
+
+            <div class="step">
+              <div class="step-num" aria-hidden="true">01</div>
+              <div>
+                <h3 class="step-title">Download the specification from GitHub</h3>
+                <p class="step-desc">Clone the repo or download CLAUDE.md directly. This is the governing document your AI reads at the start of every session. It defines the rules, red flags, and closing checklist the AI must follow.</p>
+                <div class="code-block" role="region" aria-label="Clone command">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-comment"># Clone the full repo</span>
+<span class="c-gold">git</span><span class="c-cmd"> clone https://github.com/SkipperDon/aao-methodology.git</span>
+
+<span class="c-comment"># Or download just the instruction file</span>
+<span class="c-gold">curl</span><span class="c-cmd"> -O https://raw.githubusercontent.com/SkipperDon/aao-methodology/main/CLAUDE.md</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num" aria-hidden="true">02</div>
+              <div>
+                <h3 class="step-title">Place CLAUDE.md in your project root</h3>
+                <p class="step-desc">Claude Code automatically reads any file named CLAUDE.md in your working directory. No extra configuration needed — it loads on session start.</p>
+                <div class="code-block" role="region" aria-label="File placement command">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-gold">cp</span><span class="c-cmd"> aao-methodology/CLAUDE.md ./your-project/CLAUDE.md</span>
+
+<span class="c-gold">ls</span><span class="c-cmd"> -la | grep CLAUDE</span>
+<span class="c-comment"># CLAUDE.md must appear in your project root</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num" aria-hidden="true">03</div>
+              <div>
+                <h3 class="step-title">Open Claude Code — get acknowledgement before any work</h3>
+                <p class="step-desc">Your first message every session asks Claude to confirm it has read and will follow the governing document. No acknowledgement means no work begins. This is the gate.</p>
+                <div class="code-block" role="region" aria-label="First message example">
+                  <div class="code-header"><span class="code-lang">First message</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">   Before we begin, read CLAUDE.md and confirm
+         you will follow all AAO Methodology rules
+         governing this session.</span>
+
+<span class="c-prompt">Claude ›</span><span class="c-green"> ✓ I have read CLAUDE.md. I confirm I will follow
+         all AAO Methodology requirements:
+         — Pre-action declarations before editing files
+         — Full scope plan for tasks touching 3+ files
+         — No git push without explicit human approval
+         — /session-close before ending this session</span></div>
+                </div>
+                <div class="callout green">
+                  <span class="callout-icon" aria-hidden="true">✅</span>
+                  <p><strong>If you get a response like this, you are live.</strong> Every action from this point is governed by the specification.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num" aria-hidden="true">04</div>
+              <div>
+                <h3 class="step-title">Run your first structured task</h3>
+                <p class="step-desc">For any task touching three or more files, Claude produces a full scope plan before touching anything. Review it. Approve or redirect. Nothing moves without your gate.</p>
+                <div class="code-block" role="region" aria-label="Live session example">
+                  <div class="code-header"><span class="code-lang">Live session example</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  Refactor the auth module to use JWT tokens.</span>
+
+<span class="c-prompt">Claude ›</span><span class="c-gold"> Pre-action declaration — 4 files will be modified:</span>
+<span class="c-teal">         1.</span><span class="c-cmd"> src/auth/login.js        — replace session with JWT sign</span>
+<span class="c-teal">         2.</span><span class="c-cmd"> src/auth/middleware.js   — update token verification</span>
+<span class="c-teal">         3.</span><span class="c-cmd"> src/config/auth.config.js — add JWT secret (env var only)</span>
+<span class="c-teal">         4.</span><span class="c-cmd"> tests/auth.test.js       — update test assertions</span>
+
+<span class="c-comment">         Approve this plan to proceed, or redirect?</span>
+
+<span class="c-prompt">You ›</span><span class="c-green">  Approved. Proceed.</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="step-num" aria-hidden="true">05</div>
+              <div>
+                <h3 class="step-title">Close every session with /session-close</h3>
+                <p class="step-desc">A session is not finished when the work is done. It is finished when it is properly closed. This one command triggers the full closing checklist — file change list, session log, tests confirmed, seven-point sign-off.</p>
+                <div class="code-block" role="region" aria-label="Session close example">
+                  <div class="code-header"><span class="code-lang">Closing a session</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  /session-close</span>
+
+<span class="c-prompt">Claude ›</span><span class="c-gold"> Session Close Checklist</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> File change list produced (4 files modified)</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> Session log updated</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> All tests passing (12/12)</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> No credentials in source code</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> No uncommitted deployments</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> Scope respected — no undeclared changes</span>
+<span class="c-green">         ✓</span><span class="c-cmd"> Human sign-off required</span>
+
+<span class="c-comment">         Type APPROVED to close.</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- CHATGPT -->
+      <div class="tab-panel" id="panel-chatgpt" role="tabpanel" aria-label="ChatGPT installation">
+        <div class="install-card">
+          <div class="install-header">
+            <div class="ai-name">ChatGPT</div>
+            <span class="ai-badge" style="color:#19c37d;border-color:#19c37d">GPT-4o / Custom Instructions</span>
+          </div>
+          <div class="install-steps">
+            <div class="step">
+              <div class="step-num" aria-hidden="true">01</div>
+              <div>
+                <h3 class="step-title">Download the ChatGPT instruction file</h3>
+                <p class="step-desc">The adapters folder contains a version of the AAO specification pre-formatted for ChatGPT's Custom Instructions field, trimmed to fit the character limit.</p>
+                <div class="code-block" role="region" aria-label="Download command">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-gold">curl</span><span class="c-cmd"> -O https://raw.githubusercontent.com/SkipperDon/aao-methodology/main/adapters/CHATGPT_INSTRUCTIONS.md</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">02</div>
+              <div>
+                <h3 class="step-title">Add to Custom Instructions in ChatGPT settings</h3>
+                <p class="step-desc">Navigate to Settings → Personalization → Custom Instructions. Paste the full contents of CHATGPT_INSTRUCTIONS.md into the "How would you like ChatGPT to respond?" field. Save.</p>
+                <div class="code-block" role="region" aria-label="Settings navigation">
+                  <div class="code-header"><span class="code-lang">Settings path</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-teal">ChatGPT</span><span class="c-cmd"> → Settings ⚙ → Personalization
+  → Custom Instructions
+  → "How would you like ChatGPT to respond?"</span>
+<span class="c-gold">  → Paste full CHATGPT_INSTRUCTIONS.md</span>
+<span class="c-green">  → Save</span></div>
+                </div>
+                <div class="callout amber">
+                  <span class="callout-icon" aria-hidden="true">⚠️</span>
+                  <p>Custom instructions have a character limit of approximately 1,500 characters. The condensed adapter in the <code style="color:var(--teal)">/adapters</code> folder is designed to fit within this limit.</p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">03</div>
+              <div>
+                <h3 class="step-title">Verify in a new chat</h3>
+                <p class="step-desc">Custom Instructions apply to all new conversations automatically. Open a new chat and confirm before your first task.</p>
+                <div class="code-block" role="region" aria-label="Verification prompt">
+                  <div class="code-header"><span class="code-lang">Verification prompt</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">       Confirm AAO Methodology is active and list
+             the three stages you follow each session.</span>
+
+<span class="c-prompt">ChatGPT ›</span><span class="c-green">  Confirmed. AAO Methodology active.
+             Stage 1 — START: Acknowledge rules, plan before action.
+             Stage 2 — AUDIT: Monitor, check, stop drift.
+             Stage 3 — CLOSE: Checklist, log, sign-off.</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">04</div>
+              <div>
+                <h3 class="step-title">Add project-specific rules as a conversation header</h3>
+                <p class="step-desc">For project-level constraints that vary by codebase, paste a rules block at the top of each new conversation. Or create a dedicated Custom GPT with a system prompt containing the full specification.</p>
+                <div class="code-block" role="region" aria-label="Project rules template">
+                  <div class="code-header"><span class="code-lang">Conversation opener template</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-comment">## Project Rules — [Your Project Name]</span>
+<span class="c-key">Never touch:</span><span class="c-str">  /src/legacy/*, /config/prod.env</span>
+<span class="c-key">Credentials:</span><span class="c-str"> env vars only, never inline</span>
+<span class="c-key">Tests:</span><span class="c-str">        must pass before declaring done</span>
+<span class="c-key">Deploy:</span><span class="c-str">       human approval required, always</span>
+<span class="c-comment">--- task begins below ---</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GEMINI -->
+      <div class="tab-panel" id="panel-gemini" role="tabpanel" aria-label="Gemini installation">
+        <div class="install-card">
+          <div class="install-header">
+            <div class="ai-name">Gemini</div>
+            <span class="ai-badge" style="color:var(--blue);border-color:var(--blue)">Gemini 1.5 Pro / Advanced</span>
+          </div>
+          <div class="install-steps">
+            <div class="step">
+              <div class="step-num" aria-hidden="true">01</div>
+              <div>
+                <h3 class="step-title">Download the Gemini adapter</h3>
+                <p class="step-desc">The Gemini adapter is a version of the AAO specification formatted specifically for Gemini's Gems instruction field and conversation prefix pattern.</p>
+                <div class="code-block" role="region" aria-label="Download command">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-gold">curl</span><span class="c-cmd"> -O https://raw.githubusercontent.com/SkipperDon/aao-methodology/main/adapters/GEMINI_INSTRUCTIONS.md</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">02</div>
+              <div>
+                <h3 class="step-title">Create a Gem with the AAO system prompt (Advanced)</h3>
+                <p class="step-desc">In Gemini Advanced, Gems allow you to create a persistent AI expert with custom instructions. Create one named "AAO Dev Assistant" and paste the full adapter file.</p>
+                <div class="code-block" role="region" aria-label="Gem setup">
+                  <div class="code-header"><span class="code-lang">Gem setup</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-teal">Gemini Advanced</span><span class="c-cmd"> → Explore Gems → Create a Gem</span>
+
+<span class="c-key">Name:</span><span class="c-str">         "AAO Dev Assistant"</span>
+<span class="c-key">Instructions:</span><span class="c-gold"> Paste full GEMINI_INSTRUCTIONS.md</span>
+<span class="c-green">              → Save Gem</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">03</div>
+              <div>
+                <h3 class="step-title">Free tier: prefix every conversation</h3>
+                <p class="step-desc">Without Gems access, paste the instruction block at the top of each new conversation before your task. The AI will apply the rules for the duration of that conversation.</p>
+                <div class="code-block" role="region" aria-label="Conversation prefix">
+                  <div class="code-header"><span class="code-lang">Conversation prefix</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-comment"># SYSTEM: AAO Methodology Active</span>
+<span class="c-teal">You are operating under the AAO Methodology.</span>
+<span class="c-cmd">Before any file is modified, declare your intent.
+For 3+ files, produce a full plan and await approval.
+Never declare done without tests passing.
+Never suggest git push without explicit approval.
+End every session with /session-close.</span>
+<span class="c-comment">--- task below ---</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">04</div>
+              <div>
+                <h3 class="step-title">Verify with the six red flags prompt</h3>
+                <p class="step-desc">Confirm Gemini has loaded the methodology before your first task by asking it to list the immediate-stop triggers.</p>
+                <div class="code-block" role="region" aria-label="Verification prompt">
+                  <div class="code-header"><span class="code-lang">Verification</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">    What methodology are you running and what
+          triggers an immediate stop?</span>
+
+<span class="c-prompt">Gemini ›</span><span class="c-green"> AAO Methodology. Six immediate-stop triggers:
+          1. File modified outside declared scope
+          2. Done declared without tests passing
+          3. Git push suggested without human approval
+          4. API key hardcoded in source
+          5. Terminal commands when steps required
+          6. Work started without plan/declaration</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURSOR -->
+      <div class="tab-panel" id="panel-cursor" role="tabpanel" aria-label="Cursor installation">
+        <div class="install-card">
+          <div class="install-header">
+            <div class="ai-name">Cursor</div>
+            <span class="ai-badge" style="color:#b197fc;border-color:#b197fc">Rules for AI</span>
+          </div>
+          <div class="install-steps">
+            <div class="step">
+              <div class="step-num" aria-hidden="true">01</div>
+              <div>
+                <h3 class="step-title">Create .cursorrules in your project root</h3>
+                <p class="step-desc">Cursor reads a .cursorrules file automatically at the start of every AI session. This is the native equivalent of CLAUDE.md for Cursor users — same purpose, different filename.</p>
+                <div class="code-block" role="region" aria-label="Download and setup command">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-gold">curl</span><span class="c-cmd"> -o .cursorrules \
+  https://raw.githubusercontent.com/SkipperDon/aao-methodology/main/adapters/CURSOR_RULES.md</span>
+
+<span class="c-gold">cat</span><span class="c-cmd"> .cursorrules | head -20</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">02</div>
+              <div>
+                <h3 class="step-title">Add global rules in Cursor Settings</h3>
+                <p class="step-desc">For rules that apply across all your projects, add them in Cursor Settings under AI → Rules for AI. Project-level .cursorrules override global rules — use global settings as your baseline.</p>
+                <div class="code-block" role="region" aria-label="Global rules setup">
+                  <div class="code-header"><span class="code-lang">Global rules</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-teal">Cursor</span><span class="c-cmd"> → ⌘, → AI → Rules for AI</span>
+
+<span class="c-comment">Paste your global AAO baseline here:</span>
+<span class="c-key">- Declare intent before editing any file
+- Plan for tasks touching 3+ files
+- Never declare done without tests passing
+- Never suggest git push without approval
+- Credentials in env vars only, never inline
+- End session with /session-close</span></div>
+                </div>
+                <div class="callout blue">
+                  <span class="callout-icon" aria-hidden="true">💡</span>
+                  <p>Project-level <code style="color:var(--teal)">.cursorrules</code> override global rules. Use global settings as your baseline, and <code style="color:var(--teal)">.cursorrules</code> for project-specific constraints like protected file paths.</p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">03</div>
+              <div>
+                <h3 class="step-title">Audit mid-session using @.cursorrules</h3>
+                <p class="step-desc">Reference your rules file directly in any chat message to force Cursor to re-read and re-apply AAO governance at any point during a session.</p>
+                <div class="code-block" role="region" aria-label="Mid-session audit example">
+                  <div class="code-header"><span class="code-lang">Mid-session audit</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd"> @.cursorrules — run a methodology check.
+       What files have you touched? Are you in scope?</span>
+
+<span class="c-prompt">Cursor ›</span><span class="c-green"> Re-reading rules...
+         Files touched: login.js, auth.config.js
+         Both within declared scope ✓
+         No credentials in source ✓
+         Tests pending — will run before close ✓</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COPILOT -->
+      <div class="tab-panel" id="panel-copilot" role="tabpanel" aria-label="GitHub Copilot installation">
+        <div class="install-card">
+          <div class="install-header">
+            <div class="ai-name">GitHub Copilot</div>
+            <span class="ai-badge" style="color:var(--teal);border-color:var(--teal)">Copilot Chat + Instructions</span>
+          </div>
+          <div class="install-steps">
+            <div class="step">
+              <div class="step-num" aria-hidden="true">01</div>
+              <div>
+                <h3 class="step-title">Create .github/copilot-instructions.md</h3>
+                <p class="step-desc">GitHub Copilot reads repository-level instructions from this file automatically in VS Code and JetBrains. Commit it to your repo and every team member using Copilot gets AAO governance instantly.</p>
+                <div class="code-block" role="region" aria-label="Setup and commit commands">
+                  <div class="code-header"><span class="code-lang">bash</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-gold">mkdir</span><span class="c-cmd"> -p .github</span>
+
+<span class="c-gold">curl</span><span class="c-cmd"> -o .github/copilot-instructions.md \
+  https://raw.githubusercontent.com/SkipperDon/aao-methodology/main/adapters/COPILOT_INSTRUCTIONS.md</span>
+
+<span class="c-gold">git</span><span class="c-cmd"> add .github/copilot-instructions.md</span>
+<span class="c-gold">git</span><span class="c-cmd"> commit -m "chore: add AAO Methodology Copilot instructions"</span></div>
+                </div>
+                <div class="callout green">
+                  <span class="callout-icon" aria-hidden="true">🏆</span>
+                  <p><strong>Fastest team-wide deployment.</strong> One commit enforces AAO governance for every developer on the repo. No individual setup required.</p>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">02</div>
+              <div>
+                <h3 class="step-title">Enable repository instructions in VS Code settings</h3>
+                <p class="step-desc">Confirm your VS Code settings allow Copilot to read the repository-level instructions file.</p>
+                <div class="code-block" role="region" aria-label="VS Code settings">
+                  <div class="code-header"><span class="code-lang">.vscode/settings.json</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-teal">{</span>
+  <span class="c-str">"github.copilot.chat.codeGeneration.useInstructionFiles"</span><span class="c-cmd">: </span><span class="c-green">true</span><span class="c-cmd">,</span>
+  <span class="c-str">"github.copilot.chat.reviewSelection.instructions"</span><span class="c-cmd">: </span><span class="c-teal">[</span>
+    <span class="c-teal">{</span> <span class="c-str">"file"</span><span class="c-cmd">: </span><span class="c-val">".github/copilot-instructions.md"</span> <span class="c-teal">}</span>
+  <span class="c-teal">]</span>
+<span class="c-teal">}</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-num" aria-hidden="true">03</div>
+              <div>
+                <h3 class="step-title">Run AAO stage commands via Copilot Chat</h3>
+                <p class="step-desc">Use the #file: reference to invoke the instruction file at any point — session open, mid-session audit, or session close.</p>
+                <div class="code-block" role="region" aria-label="Copilot Chat commands">
+                  <div class="code-header"><span class="code-lang">Copilot Chat</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+                  <div class="code-body"><span class="c-comment"># Open a session</span>
+<span class="c-prompt">You ›</span><span class="c-cmd"> #file:.github/copilot-instructions.md
+        Acknowledge AAO Methodology and confirm all rules.</span>
+
+<span class="c-comment"># Mid-session audit</span>
+<span class="c-prompt">You ›</span><span class="c-cmd"> #file:.github/copilot-instructions.md
+        /methodology-check — scope and files touched?</span>
+
+<span class="c-comment"># Close the session</span>
+<span class="c-prompt">You ›</span><span class="c-cmd"> #file:.github/copilot-instructions.md
+        /session-close — full checklist please.</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /reveal -->
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-left">
+    AAO Methodology is open source. Free to use, fork, and deploy.<br>
+    Built after real failures. Designed for real teams.
+  </div>
+  <a class="footer-right" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a>
+</footer>
+
+<script src="_shared.js"></script>
+</body>
+</html>

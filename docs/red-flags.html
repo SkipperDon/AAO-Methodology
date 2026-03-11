@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Flags — AAO Methodology</title>
+<meta name="description" content="The six situations that require an immediate stop in any AI assistance session. Know them. Act on them.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  html, body { background: var(--navy); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  .red-flag-card {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-left: 4px solid var(--red);
+    padding: 32px 28px;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 24px; align-items: start;
+    transition: border-color 0.25s, background 0.25s;
+    margin-bottom: 16px;
+  }
+  .red-flag-card:hover { background: var(--navy3); border-left-color: #ff9a9e; }
+
+  .flag-big-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; line-height: 1;
+    color: var(--red);
+    text-align: center;
+    margin-top: 4px;
+  }
+
+  .flag-body {}
+  .flag-name {
+    font-size: 20px; font-weight: 700;
+    color: var(--text); margin-bottom: 10px;
+  }
+  .flag-detail {
+    font-size: 15px; color: var(--slate);
+    line-height: 1.75; margin-bottom: 16px;
+  }
+  .flag-meta {
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .meta-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted);
+  }
+  .meta-val {
+    font-size: 14px; color: var(--text); font-weight: 500;
+  }
+  .meta-val.red   { color: var(--red); }
+  .meta-val.amber { color: var(--amber); }
+  .meta-val.teal  { color: var(--teal); }
+
+  .response-box {
+    margin-top: 16px;
+    background: rgba(255,107,122,0.07);
+    border: 1px solid rgba(255,107,122,0.2);
+    padding: 16px 20px;
+  }
+  .response-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 8px;
+  }
+  .response-steps {
+    list-style: none; display: flex; flex-direction: column; gap: 6px;
+    counter-reset: response-counter;
+  }
+  .response-steps li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--slate); line-height: 1.65;
+  }
+  .response-steps li::before {
+    content: counter(response-counter) '.';
+    counter-increment: response-counter;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; color: var(--red);
+    flex-shrink: 0; font-weight: 700; min-width: 20px;
+  }
+
+  .summary-table {
+    width: 100%; border-collapse: collapse; margin-top: 16px;
+  }
+  .summary-table th {
+    background: var(--navy3);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); padding: 14px 16px;
+    text-align: left; border-bottom: 1px solid var(--border);
+  }
+  .summary-table td {
+    padding: 14px 16px; font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    color: var(--slate); vertical-align: top;
+    line-height: 1.65;
+  }
+  .summary-table tr:hover td { background: rgba(0,229,195,0.03); }
+  .summary-table td:first-child {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; color: var(--red); font-weight: 700;
+    white-space: nowrap;
+  }
+  .summary-table td strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="index.html" aria-label="AAO Methodology home">
+    AAO Methodology <span class="v-badge">v1.0</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="install.html">Install</a></li>
+    <li><a href="red-flags.html" aria-current="page">Red Flags</a></li>
+    <li><a href="commands.html">Commands</a></li>
+    <li><a href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+  <a class="nav-cta" href="install.html">Get Started</a>
+</nav>
+
+<main id="main">
+
+  <header class="hero">
+    <div class="glow-orb" style="width:500px;height:500px;background:rgba(255,107,122,0.06);top:-150px;right:-80px;" aria-hidden="true"></div>
+    <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;">
+      <p class="kicker">// Immediate stop triggers</p>
+      <h1 class="hero-title" style="color:var(--red)">The 6<br>Red Flags</h1>
+      <div class="accent-line red" aria-hidden="true"></div>
+      <p class="hero-sub">Six situations that require you to stop the session immediately. Not warning signs to watch. Not things to note and move on. <strong style="color:var(--text)">Immediate stops.</strong> Every time.</p>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <section class="section" aria-labelledby="flags-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// What to look for and what to do</p>
+      <h2 class="section-title" id="flags-heading" style="color:var(--text)">Stop. Revert. <span style="color:var(--teal)">Add a Rule.</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-top:12px;max-width:640px;">Each red flag has the same response: stop the session, revert the change, understand what happened, and add a rule to your governing document to prevent it recurring. These are not bugs — they are the default behaviour of an unstructured session.</p>
+    </div>
+
+    <div aria-label="Red flags list">
+
+      <article class="red-flag-card reveal">
+        <div class="flag-big-num" aria-hidden="true">1</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI edits a file you never mentioned</h3>
+          <p class="flag-detail">Scope drift is the most common failure mode. It starts with one small change to a file that was not in the declared plan — often a helper, a config, or a shared utility. Each unchecked drift compounds the next. By the time you notice, the session has created a chain of undeclared changes across your codebase.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val red">Critical</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">Pre-action declaration missing</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Start / Audit</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop the session immediately.</li>
+              <li>Revert the undeclared file to its previous state.</li>
+              <li>Ask the AI to explain why it touched the file without declaring intent.</li>
+              <li>Add a rule to your governing document: "Declare every file before touching it."</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <article class="red-flag-card reveal" style="transition-delay:0.08s">
+        <div class="flag-big-num" aria-hidden="true">2</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI declares "done" without running tests</h3>
+          <p class="flag-detail">"Done" is the most dangerous word in an unstructured AI session. The AI has finished the task as it understood the task — but finished is not the same as working. Code that passes no tests, satisfies no quality gate, and has never been verified is not done. It is a liability waiting to be discovered at the worst possible moment.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val red">Critical</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">"Done" with no test output</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Audit / Close</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop. Do not accept the "done" declaration.</li>
+              <li>Require the AI to run the test suite and show you the output.</li>
+              <li>Add a rule: "Done means tests passing. No exceptions."</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <article class="red-flag-card reveal" style="transition-delay:0.12s">
+        <div class="flag-big-num" aria-hidden="true">3</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI suggests or attempts a git push</h3>
+          <p class="flag-detail">Deployment is a human decision. Always. An AI assistant has no awareness of your release schedule, your staging requirements, your change control process, or what is currently live in production. Any suggestion to push — even to a staging branch — is a red flag. The AI is proposing to take an irreversible action it has no authority to take.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val red">Critical</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">"git push" in output</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Any</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop. Do not run the push command.</li>
+              <li>Remind the AI that deployment requires explicit human authorisation.</li>
+              <li>Add a rule: "Never suggest or execute git push. Deployment is a human decision."</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <article class="red-flag-card reveal" style="transition-delay:0.16s">
+        <div class="flag-big-num" aria-hidden="true">4</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI hardcodes an API key in your code</h3>
+          <p class="flag-detail">Credentials belong in environment variables or a dedicated configuration file — never in source code. An API key, database password, or secret token written inline in your codebase is exposed the moment that file is committed, shared, or read by another process. This is an immediate security risk, not a style issue.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val red">Critical</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">Credential string in source file</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Any</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop. Remove the credential from the source file immediately.</li>
+              <li>Rotate the exposed key or secret.</li>
+              <li>Confirm the credential has not been committed to version control.</li>
+              <li>Add a rule: "Credentials are written to config files only. Never inline."</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <article class="red-flag-card reveal" style="transition-delay:0.20s">
+        <div class="flag-big-num" aria-hidden="true">5</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI gives terminal commands when you need step-by-step instructions</h3>
+          <p class="flag-detail">Terminal and SSH commands are high-risk operations in the wrong hands. If your environment requires click-by-click guidance and the AI produces a block of shell commands instead, there is a significant risk you will run something you do not fully understand. This is how environments break and data gets lost. The AI should know your skill level and your environment requirements — if it doesn't, that's a gap in your governing document.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val amber">High</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">Shell commands without context</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Any</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop. Do not run the commands.</li>
+              <li>Ask the AI to explain what each command does before proceeding.</li>
+              <li>Add a rule specifying the guidance format your environment requires.</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+      <article class="red-flag-card reveal" style="transition-delay:0.24s">
+        <div class="flag-big-num" aria-hidden="true">6</div>
+        <div class="flag-body">
+          <h3 class="flag-name">The AI skips the pre-action declaration and starts working</h3>
+          <p class="flag-detail">The pre-action declaration — the requirement to state intent before touching any file — is the first gate of the AAO Methodology. An AI that skips this step and starts modifying files without declaring scope has bypassed the foundational control that prevents all the other red flags. This is the most important gate. If it fails, everything downstream is at risk.</p>
+          <div class="flag-meta">
+            <div class="meta-item"><span class="meta-label">Risk level</span><span class="meta-val red">Critical</span></div>
+            <div class="meta-item"><span class="meta-label">Detection</span><span class="meta-val">File changes without declaration</span></div>
+            <div class="meta-item"><span class="meta-label">Stage</span><span class="meta-val">Start / Audit</span></div>
+          </div>
+          <div class="response-box">
+            <div class="response-label">Response</div>
+            <ol class="response-steps" role="list">
+              <li>Stop. Do not proceed.</li>
+              <li>Revert any changes made without declaration.</li>
+              <li>Re-read your governing document together with the AI.</li>
+              <li>Require a fresh acknowledgement before continuing.</li>
+            </ol>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- QUICK REFERENCE TABLE -->
+  <section class="section" aria-labelledby="summary-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Quick reference</p>
+      <h2 class="section-title" id="summary-heading">At a <span style="color:var(--teal)">Glance</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+    </div>
+    <div class="reveal" style="transition-delay:0.1s;overflow-x:auto;">
+      <table class="summary-table" aria-label="Red flags quick reference">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Red Flag</th>
+            <th scope="col">Risk</th>
+            <th scope="col">Immediate Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>#1</td><td><strong>File edited outside declared scope</strong></td><td><span style="color:var(--red)">Critical</span></td><td>Stop. Revert. Add declaration rule.</td></tr>
+          <tr><td>#2</td><td><strong>"Done" declared without tests</strong></td><td><span style="color:var(--red)">Critical</span></td><td>Stop. Run tests. Redefine done.</td></tr>
+          <tr><td>#3</td><td><strong>Git push suggested or attempted</strong></td><td><span style="color:var(--red)">Critical</span></td><td>Stop. No push without human approval.</td></tr>
+          <tr><td>#4</td><td><strong>API key hardcoded in source</strong></td><td><span style="color:var(--red)">Critical</span></td><td>Stop. Remove. Rotate key. Add rule.</td></tr>
+          <tr><td>#5</td><td><strong>Terminal commands without context</strong></td><td><span style="color:var(--amber)">High</span></td><td>Stop. Understand before running.</td></tr>
+          <tr><td>#6</td><td><strong>Work starts without declaration</strong></td><td><span style="color:var(--red)">Critical</span></td><td>Stop. Revert. Re-acknowledge rules.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout green reveal" style="margin-top:24px;transition-delay:0.2s">
+      <span class="callout-icon" aria-hidden="true">📋</span>
+      <p>The response to all six is the same pattern: <strong>Stop. Revert. Understand what happened. Add a rule.</strong> Consistent response is what makes the methodology reliable.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="section" style="padding-bottom:80px;">
+    <div class="reveal" style="max-width:680px;">
+      <p class="kicker">// Next step</p>
+      <h2 class="section-title">Ready to <span style="color:var(--teal)">Install?</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-bottom:32px;">Now that you know the red flags, set up the methodology so they fire before damage is done — not after.</p>
+      <a href="install.html" style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--navy);background:var(--teal);font-weight:700;text-decoration:none;padding:14px 28px;display:inline-block;">Install for Your AI Tool →</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-left">
+    AAO Methodology is open source. Free to use, fork, and deploy.<br>
+    Built after real failures. Designed for real teams.
+  </div>
+  <a class="footer-right" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a>
+</footer>
+
+<script src="_shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAO Methodology — Structured AI Assistance</title>
+<meta name="description" content="The AAO Methodology is a structured, human-led framework that brings quality control to every AI assistance session. Start structured. Stay in control.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  html, body { background: var(--navy); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  /* ── STAGE PILLS ── */
+  .stage-row { display: flex; gap: 16px; margin-top: 28px; flex-wrap: wrap; }
+  .stage-pill {
+    flex: 1; min-width: 220px;
+    background: var(--navy2);
+    border-left: 4px solid var(--teal);
+    padding: 24px 22px;
+  }
+  .stage-pill.audit { border-color: var(--blue); }
+  .stage-pill.close { border-color: var(--amber); }
+  .stage-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 44px; line-height: 1; color: var(--teal);
+  }
+  .stage-pill.audit .stage-num { color: var(--blue); }
+  .stage-pill.close .stage-num { color: var(--amber); }
+  .stage-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px; letter-spacing: 2px; margin-bottom: 10px;
+  }
+  .stage-pill p { font-size: 14px; color: var(--slate); line-height: 1.7; }
+
+  /* ── PROBLEM GRID ── */
+  .problem-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px; margin-top: 16px;
+  }
+  .problem-card {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-top: 3px solid var(--red);
+    padding: 24px 22px;
+  }
+  .problem-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--red); margin-bottom: 10px;
+  }
+  .problem-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px; letter-spacing: 1px; margin-bottom: 10px;
+  }
+  .problem-card p { font-size: 14px; color: var(--slate); line-height: 1.7; }
+
+  /* ── CTA ROW ── */
+  .cta-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 36px; }
+  .btn-primary {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--navy); background: var(--teal); font-weight: 700;
+    text-decoration: none; padding: 14px 28px;
+    transition: opacity 0.2s, transform 0.2s; display: inline-block;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn-ghost {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal);
+    text-decoration: none; padding: 14px 28px;
+    transition: background 0.2s; display: inline-block;
+  }
+  .btn-ghost:hover { background: rgba(0,229,195,0.08); }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    border-left: 3px solid var(--teal);
+    padding: 20px 24px;
+    background: rgba(0,229,195,0.05);
+    margin: 24px 0;
+  }
+  .quote-block p {
+    font-size: 17px; color: var(--slate); line-height: 1.75; font-style: italic;
+  }
+  .quote-block strong { color: var(--text); font-style: normal; }
+
+  /* ── PRINCIPLES ── */
+  .principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px; margin-top: 16px;
+  }
+  .principle-card {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.06);
+    padding: 24px 20px;
+    position: relative; overflow: hidden;
+  }
+  .principle-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px; line-height: 0.85; color: rgba(0,229,195,0.12);
+    margin-bottom: 8px;
+  }
+  .principle-title {
+    font-size: 15px; font-weight: 600; color: var(--teal); margin-bottom: 8px;
+  }
+  .principle-card p { font-size: 14px; color: var(--slate); line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="index.html" aria-label="AAO Methodology home">
+    AAO Methodology <span class="v-badge">v1.0</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="install.html">Install</a></li>
+    <li><a href="red-flags.html">Red Flags</a></li>
+    <li><a href="commands.html">Commands</a></li>
+    <li><a href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+  <a class="nav-cta" href="install.html">Get Started</a>
+</nav>
+
+<main id="main">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="glow-orb" style="width:600px;height:600px;background:rgba(0,229,195,0.07);top:-200px;right:-100px;" aria-hidden="true"></div>
+    <div class="glow-orb" style="width:350px;height:350px;background:rgba(93,184,245,0.05);bottom:-100px;left:5%;" aria-hidden="true"></div>
+    <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;">
+      <p class="kicker">Autonomous Action Operating Methodology</p>
+      <h1 class="hero-title">
+        YOUR AI WORKS FOR <span class="teal">YOU.</span><br>
+        <span style="font-size:0.52em;color:var(--slate);letter-spacing:1px;">NOT THE OTHER WAY AROUND.</span>
+      </h1>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="hero-sub">
+        A structured, human-led framework that applies proven quality management principles to every AI assistance session — so your AI delivers the right outcome, at the right cost, on time.
+      </p>
+      <div class="cta-row">
+        <a class="btn-primary" href="install.html">Start Installing</a>
+        <a class="btn-ghost" href="red-flags.html">See the Red Flags</a>
+        <a class="btn-ghost" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+      <div class="hero-stats" style="margin-top:56px;">
+        <div><div class="stat-num" style="color:var(--teal)">3</div><div class="stat-label">Stages every session</div></div>
+        <div><div class="stat-num" style="color:var(--red)">6</div><div class="stat-label">Red flags to stop on</div></div>
+        <div><div class="stat-num" style="color:var(--amber)">&lt;1h</div><div class="stat-label">Setup time</div></div>
+        <div><div class="stat-num" style="color:var(--blue)">Free</div><div class="stat-label">Open source</div></div>
+      </div>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <!-- THE PROBLEM -->
+  <section class="section" aria-labelledby="problem-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// The problem</p>
+      <h2 class="section-title" id="problem-heading">Three Ways AI <span style="color:var(--red)">Breaks Down</span></h2>
+      <div class="accent-line red" aria-hidden="true"></div>
+    </div>
+    <div class="problem-grid reveal" style="transition-delay:0.15s">
+      <div class="problem-card">
+        <div class="problem-label">Pattern 01</div>
+        <div class="problem-title">Drift</div>
+        <p>The AI starts solving problems outside your scope. It modifies files you never mentioned. It changes logic without declaring intent. Each unchecked action compounds the risk and the cost.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-label">Pattern 02</div>
+        <div class="problem-title">Hallucination</div>
+        <p>The AI generates confident, plausible-sounding answers that are simply wrong. Code that looks correct but breaks. Documentation that misleads. Decisions built on fiction — billed as fact.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-label">Pattern 03</div>
+        <div class="problem-title">Data Exposure</div>
+        <p>Without guardrails, AI assistants handle API keys, credentials, and sensitive data in ways you never approved. Not edge cases — default behaviour of an unstructured session.</p>
+      </div>
+    </div>
+    <div class="quote-block reveal" style="transition-delay:0.3s;margin-top:36px;">
+      <p>We gave AI assistants the power of a senior engineer — and <strong>none of the process controls</strong> we expect from one. The capability is there. The process is not. And process is what keeps capability from becoming liability.</p>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- THE SOLUTION -->
+  <section class="section" aria-labelledby="solution-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// The solution</p>
+      <h2 class="section-title" id="solution-heading">Three Stages. <span style="color:var(--teal)">Every Session.</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-top:12px;max-width:640px;">The AAO Methodology structures every AI assistance session into three stages. The consistency is not a constraint — it is the source of the reliability.</p>
+    </div>
+    <div class="stage-row reveal" style="transition-delay:0.15s">
+      <div class="stage-pill">
+        <div class="stage-num">01</div>
+        <div class="stage-name">Start</div>
+        <p>The AI acknowledges your governing documents and confirms it will follow all rules. For any task touching three or more files, it produces a complete plan for your review before a single file is touched. You approve or redirect. Nothing moves without your gate.</p>
+      </div>
+      <div class="stage-pill audit">
+        <div class="stage-num">02</div>
+        <div class="stage-name">Audit</div>
+        <p>You stay present. You monitor for drift. Five situations trigger an audit check. One command — <code style="color:var(--teal);font-size:13px;">/methodology-check</code> — runs a nine-question self-audit on demand. Drift surfaces before it becomes damage.</p>
+      </div>
+      <div class="stage-pill close">
+        <div class="stage-num">03</div>
+        <div class="stage-name">Close</div>
+        <p>A session is not finished when the work is done. It is finished when it is properly closed. One command triggers the full checklist: file change list, session log, tests confirmed passing, and your seven-point sign-off. Not before.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- PRINCIPLES -->
+  <section class="section" aria-labelledby="principles-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Built on proven foundations</p>
+      <h2 class="section-title" id="principles-heading">Total Quality <span style="color:var(--teal)">Improvement</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-top:12px;max-width:640px;">The methodology is grounded in four Total Quality Improvement principles applied directly to AI assistance sessions.</p>
+    </div>
+    <div class="principles-grid reveal" style="transition-delay:0.15s">
+      <div class="principle-card">
+        <div class="principle-num">1</div>
+        <div class="principle-title">Prevention, not correction</div>
+        <p>Problems are caught before they become damage — through planning, review, and confirmation upstream. Not audited after the fact.</p>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">2</div>
+        <div class="principle-title">Continuous monitoring</div>
+        <p>Quality is maintained throughout the session, not checked at the end. The audit stage runs continuously — not as a post-mortem.</p>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">3</div>
+        <div class="principle-title">Human orchestration</div>
+        <p>The human stays in control. AI recommends and executes. The human approves and closes. Every gate. Every decision point. Every transition.</p>
+      </div>
+      <div class="principle-card">
+        <div class="principle-num">4</div>
+        <div class="principle-title">Process discipline</div>
+        <p>Every session follows the same structure. Consistency is what makes quality repeatable — and what makes reliable delivery possible.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- FINAL CTA -->
+  <section class="section" aria-labelledby="cta-heading" style="padding-bottom:80px;">
+    <div class="reveal" style="max-width:680px;">
+      <p class="kicker">// Start today</p>
+      <h2 class="section-title" id="cta-heading">START STRUCTURED.<br><span style="color:var(--teal)">STAY IN CONTROL.</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-bottom:32px;">The full methodology specification, instruction file templates, and everything you need to deploy today is free and open source. No vendor lock-in. No tooling changes. Just structure — applied from message one.</p>
+      <div class="cta-row">
+        <a class="btn-primary" href="install.html">Install for Your AI Tool</a>
+        <a class="btn-ghost" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">View on GitHub ↗</a>
+      </div>
+      <p style="margin-top:20px;font-family:'Space Mono',monospace;font-size:13px;color:var(--muted);">github.com/SkipperDon/aao-methodology</p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-left">
+    AAO Methodology is open source. Free to use, fork, and deploy.<br>
+    Built after real failures. Designed for real teams.
+  </div>
+  <a class="footer-right" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">
+    GitHub ↗
+  </a>
+</footer>
+
+<script src="_shared.js"></script>
+</body>
+</html>

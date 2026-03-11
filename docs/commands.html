@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commands — AAO Methodology</title>
+<meta name="description" content="In-session commands for the AAO Methodology. /methodology-check, /session-close, /compact, /clear — what they do and when to use them.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  html, body { background: var(--navy); color: var(--text); font-family: 'Inter', sans-serif; }
+
+  .cmd-full-card {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 36px 32px;
+    position: relative; overflow: hidden;
+    margin-bottom: 16px;
+    transition: border-color 0.25s;
+  }
+  .cmd-full-card:hover { border-color: rgba(0,229,195,0.2); }
+  .cmd-top-bar { position: absolute; top: 0; left: 0; width: 100%; height: 3px; }
+
+  .cmd-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+  .cmd-name {
+    font-family: 'Space Mono', monospace;
+    font-size: 22px; font-weight: 700; color: var(--teal);
+  }
+  .cmd-when-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; border: 1px solid var(--border); color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .cmd-desc { font-size: 16px; color: var(--slate); line-height: 1.75; margin-bottom: 24px; }
+
+  .cmd-triggers {
+    margin-bottom: 24px;
+  }
+  .cmd-triggers-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+  .trigger-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .trigger-list li {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 14px; color: var(--slate); line-height: 1.65;
+  }
+  .trigger-list li::before {
+    content: '→'; font-family: 'Space Mono', monospace;
+    font-size: 13px; color: var(--teal); flex-shrink: 0; margin-top: 1px;
+  }
+
+  .cmd-example-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 12px;
+  }
+
+  /* Stage flow diagram */
+  .stage-flow {
+    display: flex; align-items: center; gap: 0;
+    flex-wrap: wrap; margin: 32px 0; overflow: hidden;
+  }
+  .flow-stage {
+    flex: 1; min-width: 180px;
+    background: var(--navy2); padding: 20px 18px;
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .flow-stage-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px; line-height: 1; margin-bottom: 4px;
+  }
+  .flow-stage-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px; letter-spacing: 2px; margin-bottom: 10px;
+  }
+  .flow-stage-cmds { display: flex; flex-direction: column; gap: 4px; }
+  .flow-cmd {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px; padding: 4px 10px;
+    display: inline-block; width: fit-content;
+  }
+  .flow-arrow {
+    padding: 0 8px;
+    font-size: 20px; color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  /* Quick ref grid */
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px; margin-top: 16px;
+  }
+  .quick-card {
+    background: var(--navy2);
+    border: 1px solid rgba(255,255,255,0.07);
+    padding: 20px 18px;
+    position: relative; overflow: hidden;
+  }
+  .quick-bar { position: absolute; top: 0; left: 0; width: 100%; height: 3px; }
+  .quick-cmd { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; color: var(--teal); margin-bottom: 6px; }
+  .quick-summary { font-size: 13px; color: var(--slate); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<canvas id="particles" aria-hidden="true"></canvas>
+
+<nav aria-label="Main navigation">
+  <a class="nav-logo" href="index.html" aria-label="AAO Methodology home">
+    AAO Methodology <span class="v-badge">v1.0</span>
+  </a>
+  <ul class="nav-links" role="list">
+    <li><a href="install.html">Install</a></li>
+    <li><a href="red-flags.html">Red Flags</a></li>
+    <li><a href="commands.html" aria-current="page">Commands</a></li>
+    <li><a href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a></li>
+  </ul>
+  <a class="nav-cta" href="install.html">Get Started</a>
+</nav>
+
+<main id="main">
+
+  <header class="hero">
+    <div class="glow-orb" style="width:500px;height:500px;background:rgba(0,229,195,0.07);top:-150px;right:-80px;" aria-hidden="true"></div>
+    <div style="position:relative;z-index:1;max-width:1100px;margin:0 auto;">
+      <p class="kicker">// In-session controls</p>
+      <h1 class="hero-title">AAO <span class="teal">Commands</span></h1>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="hero-sub">Four commands that run the methodology during a live session. Type them in your AI chat exactly as shown. They work across all supported tools once the instruction file is loaded.</p>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <!-- SESSION FLOW OVERVIEW -->
+  <section class="section" aria-labelledby="flow-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Where each command fits</p>
+      <h2 class="section-title" id="flow-heading">The Session <span style="color:var(--teal)">Flow</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+    </div>
+    <div class="stage-flow reveal" style="transition-delay:0.1s" role="img" aria-label="Session flow: Start stage uses acknowledge, then Audit stage uses methodology-check and compact, then Close stage uses session-close and clear">
+      <div class="flow-stage">
+        <div class="flow-stage-num" style="color:var(--teal)">01</div>
+        <div class="flow-stage-name" style="color:var(--teal)">Start</div>
+        <div class="flow-stage-cmds">
+          <span class="flow-cmd" style="background:rgba(0,229,195,0.1);color:var(--teal)">Acknowledge</span>
+          <span class="flow-cmd" style="background:rgba(0,229,195,0.1);color:var(--teal)">Plan request</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-stage">
+        <div class="flow-stage-num" style="color:var(--blue)">02</div>
+        <div class="flow-stage-name" style="color:var(--blue)">Audit</div>
+        <div class="flow-stage-cmds">
+          <span class="flow-cmd" style="background:rgba(93,184,245,0.1);color:var(--blue)">/methodology-check</span>
+          <span class="flow-cmd" style="background:rgba(93,184,245,0.1);color:var(--blue)">/compact</span>
+        </div>
+      </div>
+      <div class="flow-arrow" aria-hidden="true">→</div>
+      <div class="flow-stage">
+        <div class="flow-stage-num" style="color:var(--amber)">03</div>
+        <div class="flow-stage-name" style="color:var(--amber)">Close</div>
+        <div class="flow-stage-cmds">
+          <span class="flow-cmd" style="background:rgba(255,184,0,0.1);color:var(--amber)">/session-close</span>
+          <span class="flow-cmd" style="background:rgba(255,107,122,0.1);color:var(--red)">/clear (task switch)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- COMMANDS DETAIL -->
+  <section class="section" aria-labelledby="commands-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Full reference</p>
+      <h2 class="section-title" id="commands-heading">Command <span style="color:var(--teal)">Reference</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+    </div>
+
+    <article class="cmd-full-card reveal">
+      <div class="cmd-top-bar" style="background:var(--teal)" aria-hidden="true"></div>
+      <div class="cmd-header">
+        <h3 class="cmd-name">/methodology-check</h3>
+        <span class="cmd-when-badge">Stage 2 — Audit</span>
+      </div>
+      <p class="cmd-desc">Runs a nine-question self-audit on demand. Forces the AI to declare its current scope, list every file it has touched, confirm no drift has occurred, and confirm no red flags are present. Use it any time something feels off — or proactively at regular intervals in a long session.</p>
+      <div class="cmd-triggers">
+        <div class="cmd-triggers-label">Use this command when...</div>
+        <ul class="trigger-list" role="list">
+          <li>The task is becoming more complex than originally scoped</li>
+          <li>The AI has touched something that was not in the original plan</li>
+          <li>You are switching from one task to a related task in the same session</li>
+          <li>The conversation is getting long and you want to confirm state</li>
+          <li>Something simply does not feel right — trust that instinct</li>
+        </ul>
+      </div>
+      <div class="cmd-example-label">Example output</div>
+      <div class="code-block" role="region" aria-label="methodology-check example output">
+        <div class="code-header"><span class="code-lang">Methodology check output</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+        <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  /methodology-check</span>
+
+<span class="c-prompt">AI  ›</span><span class="c-gold">  AAO Methodology Self-Audit</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Governing documents acknowledged at session start</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Current scope: auth module JWT refactor (4 files declared)</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Files touched: login.js, middleware.js (within scope)</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No undeclared file modifications</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No credentials in source code</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No git push suggested or attempted</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Tests not yet run — will run before /session-close</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No red flags detected in this session</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Session in good standing — continuing within scope</span></div>
+      </div>
+    </article>
+
+    <article class="cmd-full-card reveal" style="transition-delay:0.08s">
+      <div class="cmd-top-bar" style="background:var(--amber)" aria-hidden="true"></div>
+      <div class="cmd-header">
+        <h3 class="cmd-name" style="color:var(--amber)">/session-close</h3>
+        <span class="cmd-when-badge">Stage 3 — Close</span>
+      </div>
+      <p class="cmd-desc">Triggers the full session closing checklist. A session is not finished when the work is done — it is finished when it is properly closed. This command produces four mandatory outputs: a file change list, an updated session log entry, a release manifest (if deployment occurred), and a plain-language session summary. You then review against a seven-point sign-off checklist.</p>
+      <div class="cmd-triggers">
+        <div class="cmd-triggers-label">Use this command when...</div>
+        <ul class="trigger-list" role="list">
+          <li>The work for this session is complete and you are ready to close</li>
+          <li>Before you end any AI session — without exception</li>
+          <li>The AI declares the task "done" — confirm with this command before accepting</li>
+        </ul>
+      </div>
+      <div class="cmd-example-label">Example output</div>
+      <div class="code-block" role="region" aria-label="session-close example output">
+        <div class="code-header"><span class="code-lang">Session close output</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+        <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  /session-close</span>
+
+<span class="c-prompt">AI  ›</span><span class="c-gold">  Session Close Checklist — Seven-Point Sign-Off</span>
+
+<span class="c-teal">      FILE CHANGE LIST</span>
+<span class="c-cmd">      src/auth/login.js       — JWT sign implementation added</span>
+<span class="c-cmd">      src/auth/middleware.js  — Token verification updated</span>
+<span class="c-cmd">      src/config/auth.config.js — JWT secret added (env var reference)</span>
+<span class="c-cmd">      tests/auth.test.js      — All assertions updated</span>
+
+<span class="c-teal">      SIGN-OFF CHECKLIST</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> All modified files listed above</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Session log updated (entry #047)</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> All tests passing (14/14)</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No credentials in source code</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> No uncommitted deployments</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> All changes within declared scope</span>
+<span class="c-green">      ✓</span><span class="c-cmd"> Human sign-off required to close</span>
+
+<span class="c-comment">      Type APPROVED to close this session.</span></div>
+      </div>
+    </article>
+
+    <article class="cmd-full-card reveal" style="transition-delay:0.12s">
+      <div class="cmd-top-bar" style="background:var(--blue)" aria-hidden="true"></div>
+      <div class="cmd-header">
+        <h3 class="cmd-name" style="color:var(--blue)">/compact</h3>
+        <span class="cmd-when-badge">Stage 2 — Audit</span>
+      </div>
+      <p class="cmd-desc">Condenses the session context when it is getting long. At the 50% context threshold, conversation history can cause the AI to lose track of earlier declarations and scope boundaries. This command produces a compressed summary of work done, current scope, files touched, and outstanding tasks — without losing state. Use it proactively before context runs out.</p>
+      <div class="cmd-triggers">
+        <div class="cmd-triggers-label">Use this command when...</div>
+        <ul class="trigger-list" role="list">
+          <li>The session has been running for a long time and the context is getting full</li>
+          <li>You are at approximately the 50% context threshold for your AI tool</li>
+          <li>You notice the AI starting to forget earlier declarations or scope boundaries</li>
+          <li>You want a clean summary of session state before continuing</li>
+        </ul>
+      </div>
+      <div class="cmd-example-label">Example output</div>
+      <div class="code-block" role="region" aria-label="compact command example output">
+        <div class="code-header"><span class="code-lang">Compact output</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+        <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  /compact</span>
+
+<span class="c-prompt">AI  ›</span><span class="c-gold">  Session Context — Compacted</span>
+
+<span class="c-teal">      COMPLETED WORK</span>
+<span class="c-cmd">      — JWT token sign implemented in login.js</span>
+<span class="c-cmd">      — Middleware verification updated</span>
+
+<span class="c-teal">      CURRENT SCOPE</span>
+<span class="c-cmd">      — Auth module JWT refactor (originally declared)</span>
+<span class="c-cmd">      — Remaining: auth.config.js, auth.test.js</span>
+
+<span class="c-teal">      ACTIVE RULES</span>
+<span class="c-cmd">      — All governing documents in effect</span>
+<span class="c-cmd">      — No drift detected in this session</span>
+
+<span class="c-comment">      Context compacted. Continuing within declared scope.</span></div>
+      </div>
+    </article>
+
+    <article class="cmd-full-card reveal" style="transition-delay:0.16s">
+      <div class="cmd-top-bar" style="background:var(--red)" aria-hidden="true"></div>
+      <div class="cmd-header">
+        <h3 class="cmd-name" style="color:var(--red)">/clear</h3>
+        <span class="cmd-when-badge">Task Switch</span>
+      </div>
+      <p class="cmd-desc">Resets the session context entirely when you are switching to a completely different task. Unlike /compact, which compresses and retains state, /clear starts fresh. It forces a new acknowledgement of all governing documents and a new scope declaration for the incoming task. Use this between unrelated tasks in the same session to prevent scope bleed.</p>
+      <div class="cmd-triggers">
+        <div class="cmd-triggers-label">Use this command when...</div>
+        <ul class="trigger-list" role="list">
+          <li>You have completed one task and are starting a completely different one</li>
+          <li>The new task involves a different part of the codebase with different constraints</li>
+          <li>You want a clean slate with fresh acknowledgement before a high-risk task</li>
+          <li>The current session context has become confused or contradictory</li>
+        </ul>
+      </div>
+      <div class="cmd-example-label">Example output</div>
+      <div class="code-block" role="region" aria-label="clear command example output">
+        <div class="code-header"><span class="code-lang">Clear output</span><button class="copy-btn" onclick="copyCode(this)" aria-label="Copy code">Copy</button></div>
+        <div class="code-body"><span class="c-prompt">You ›</span><span class="c-cmd">  /clear</span>
+
+<span class="c-prompt">AI  ›</span><span class="c-gold">  Context cleared. Starting fresh.</span>
+
+<span class="c-comment">      All previous session context has been reset.
+      I am re-reading my governing documents now.</span>
+
+<span class="c-green">      ✓ Governing documents re-acknowledged</span>
+<span class="c-green">      ✓ No inherited scope from previous task</span>
+<span class="c-green">      ✓ Ready for new task declaration</span>
+
+<span class="c-cmd">      Please declare your new task and I will
+      produce a scope plan before proceeding.</span></div>
+      </div>
+    </article>
+
+  </section>
+
+  <hr class="rule">
+
+  <!-- QUICK REFERENCE -->
+  <section class="section" aria-labelledby="quick-heading">
+    <div class="section-header reveal">
+      <p class="kicker">// Quick reference</p>
+      <h2 class="section-title" id="quick-heading">At a <span style="color:var(--teal)">Glance</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+    </div>
+    <div class="quick-grid reveal" style="transition-delay:0.1s">
+      <div class="quick-card"><div class="quick-bar" style="background:var(--teal)"></div><div class="quick-cmd">/methodology-check</div><div class="quick-summary">Nine-question self-audit. Use any time something feels off, or at regular intervals in long sessions.</div></div>
+      <div class="quick-card"><div class="quick-bar" style="background:var(--amber)"></div><div class="quick-cmd">/session-close</div><div class="quick-summary">Full closing checklist. File list, session log, tests confirmed, seven-point sign-off. Use at end of every session.</div></div>
+      <div class="quick-card"><div class="quick-bar" style="background:var(--blue)"></div><div class="quick-cmd">/compact</div><div class="quick-summary">Compress context at 50% threshold. Retains work state. Use proactively in long sessions.</div></div>
+      <div class="quick-card"><div class="quick-bar" style="background:var(--red)"></div><div class="quick-cmd">/clear</div><div class="quick-summary">Full context reset. Requires fresh acknowledgement. Use when switching to an unrelated task.</div></div>
+    </div>
+  </section>
+
+  <hr class="rule">
+
+  <section class="section" style="padding-bottom:80px;">
+    <div class="reveal" style="max-width:680px;">
+      <p class="kicker">// Haven't installed yet?</p>
+      <h2 class="section-title">Set Up Your <span style="color:var(--teal)">First Session</span></h2>
+      <div class="accent-line" aria-hidden="true"></div>
+      <p class="body-text" style="margin-bottom:32px;">These commands only work once the AAO specification file is installed for your AI tool. Follow the step-by-step guide for your tool.</p>
+      <a href="install.html" style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--navy);background:var(--teal);font-weight:700;text-decoration:none;padding:14px 28px;display:inline-block;">Install for Your AI Tool →</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-left">
+    AAO Methodology is open source. Free to use, fork, and deploy.<br>
+    Built after real failures. Designed for real teams.
+  </div>
+  <a class="footer-right" href="https://github.com/SkipperDon/aao-methodology" target="_blank" rel="noopener">GitHub ↗</a>
+</footer>
+
+<script src="_shared.js"></script>
+</body>
+</html>
