@@ -100,7 +100,66 @@ A task is NOT complete until ALL of the following are true:
 - [ ] Summary presented in chat for operator review
 
 ### Session End
-Write a session summary to the project session log and present a summary in chat.
+
+Session close is a required sequence. Every step is mandatory unless explicitly
+noted as conditional. Steps are performed in order. Do not skip steps because
+"nothing changed" — if a file does not need updating, state that explicitly in
+the chat summary.
+
+**Step 1 — SESSION_LOG.md**
+Write a new entry to the project SESSION_LOG.md.
+Include: date, goal, completed items, decisions with rationale, Ollama call counts
+(if applicable), cost table (Claude API cost from console.anthropic.com, Ollama
+always $0), and pending items.
+Never edit or delete prior entries. Append only.
+
+**Step 2 — PROJECT_CHECKLIST.md**
+Update PROJECT_CHECKLIST.md:
+- Mark any tasks completed this session as done
+- Add any new tasks discovered during the session
+- Update status of in-progress items
+- Do not remove any existing entries — update status only
+
+**Step 3 — DEPLOYMENT_INDEX.md**
+Update deployment/docs/DEPLOYMENT_INDEX.md:
+- Add any new files created this session (full path, description, version)
+- Add any new documents created this session
+- Add any new features built or fixed
+- Update version numbers if a milestone was reached
+Rule: every file built or fixed this session must appear in this index.
+
+**Step 4 — CHANGELOG.md** (conditional)
+Update CHANGELOG.md only if a version milestone was reached or a significant
+feature was completed. Skip and state "no changelog entry needed" if not applicable.
+
+**Step 5 — MEMORY.md**
+Update /home/boatiq/.claude/projects/-home-boatiq/memory/MEMORY.md:
+- Add any stable patterns confirmed this session
+- Add any corrections to prior assumptions
+- Add any key facts that should persist across sessions
+- Do not add transient or session-specific details
+
+**Step 6 — BUILD_CHECKLIST.md** (conditional)
+If an active feature build was in progress this session, update
+deployment/features/<feature>/BUILD_CHECKLIST.md:
+- Mark completed build steps
+- Note any steps that were blocked or deferred
+Skip and state "no active build checklist" if not applicable.
+
+**Step 7 — Feature or Solution Docs** (conditional)
+If a feature document (e.g. MARINE_VISION_CAMERA_SYSTEM.md) was affected by work
+done this session, update it to reflect the current state. Version bump the
+document header. Skip and state which docs were not affected if not applicable.
+
+**Step 8 — Chat Summary**
+Present a concise human-readable summary in chat covering:
+- What was accomplished
+- What was deferred or blocked
+- Which governance files were updated (list them)
+- Which governance files were skipped and why
+- Any decisions the operator should be aware of
+
+The chat summary is the final step. It is not optional.
 
 ---
 
@@ -142,6 +201,12 @@ If a task requires an action outside scope: STOP, state the gap, ask for authori
 - [ ] All changes logged in session log (complete, not summarized)
 - [ ] Release Package Manifest produced if deployment occurred
 - [ ] Session summary complete and human-reviewable at end
+- [ ] PROJECT_CHECKLIST.md updated (tasks marked, new tasks added)
+- [ ] DEPLOYMENT_INDEX.md updated (all new files and features indexed)
+- [ ] CHANGELOG.md updated if version milestone reached (or skip stated)
+- [ ] MEMORY.md updated with stable facts from this session (or skip stated)
+- [ ] BUILD_CHECKLIST.md updated if active build in progress (or skip stated)
+- [ ] Feature docs version-bumped if affected by this session (or skip stated)
 
 ---
 
