@@ -193,4 +193,43 @@ See CLAUDE.md — Pre-Edit Snapshot Rule for the governing instruction.
 
 ---
 
+---
+
+## 6.5 Backup Naming Standard
+
+When an operator explicitly requests a file backup, all backups follow the
+AAO Backup Standard defined in **SPECIFICATION.md Section 18** and documented
+in full at **docs/12-backup-naming-standard.md**.
+
+### At a Glance
+
+```
+.aao-backups/YYYYMMDD_HHMMSS_<SESSION_ID>/mirrored/path/filename.ext.bak
+```
+
+Example: `.aao-backups/20260319_143205_a3f9/src/config/database.js.bak`
+
+### Key Rules
+
+- All backups go to `.aao-backups/` — never alongside the original
+- `.aao-backups/` is always in `.gitignore` — never committed
+- One session folder per session — timestamp fixed at first backup
+- `.bak` always appended — original extension never replaced
+- Keep last 3 backups per file — older ones are purge-eligible
+- Never purge without listing files and receiving explicit confirmation
+
+### Commands
+
+`/aao-backup-status` — all backups, age, purge eligibility (read-only)
+`/aao-backup-purge` — review eligible files, confirm, delete, report
+
+### Relationship to Section 17
+
+Section 17 (git clean state) is the primary recovery mechanism — active
+every session automatically.
+Section 18 (explicit backup) is secondary — active when operator requests a backup.
+Both can be active in the same session.
+
+---
+
 *[Back: 05 — Prompt Injection](05-prompt-injection.md) | [Next: 07 — SDLC Integration](07-sdlc-integration.md)*

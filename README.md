@@ -176,7 +176,9 @@ aao-methodology/
 │   ├── 07-sdlc-integration.md         ← How AAO extends your SDLC
 │   ├── 08-failure-intelligence.md     ← Self-improving system design
 │   ├── 09-human-signoff-repository.md ← Human sign-off and artifact repository
-│   └── 10-risk-register-map-alignment.md ← Risk Register and NIST MAP alignment
+│   ├── 10-risk-register-map-alignment.md ← Risk Register and NIST MAP alignment
+│   ├── 11-testing-taxonomy.md           ← Testing taxonomy and strategy
+│   └── 12-backup-naming-standard.md    ← AAO backup naming convention and cleanup
 │
 ├── templates/
 │   ├── action-whitelist.json          ← Starter whitelist template

@@ -1,6 +1,6 @@
 # AAO Specification
 ## Autonomous Action Operating Methodology — Complete Specification
-### Version 1.2 | © 2026 Donald Moskaluk | AtMyBoat.com
+### Version 1.3 | © 2026 Donald Moskaluk | AtMyBoat.com
 
 
 > **⚠️ DISCLAIMER — Framework Under Development**
@@ -970,6 +970,107 @@ deployment contexts.
 
 ---
 
-*AAO Specification v1.2 | © 2026 Donald Moskaluk | AtMyBoat.com*
+---
+
+## 18. BACKUP NAMING STANDARD
+
+### 18.1 Purpose
+
+Claude Code and equivalent AI coding assistants have no automatic backup
+mechanism. When instructed to back up a file, the assistant creates a copy
+using whatever naming convention it generates on the fly — inconsistent across
+sessions, unpredictable in location, and unmanageable at scale.
+
+In a project with backup files created across many sessions, there is no
+reliable way to determine which session created which backup, which backups
+are safe to delete, or which backup corresponds to a specific prior state.
+
+This section defines the AAO Backup Standard — a single, mandatory convention
+for every backup file created by an AI assistant operating under this methodology.
+
+See `docs/12-backup-naming-standard.md` for the full explanation of each
+design decision.
+
+### 18.2 The Backup Directory
+
+**18.2.1** All backup files MUST be created inside a `.aao-backups/` directory
+at the project root. Backup files MUST NOT be created in the same directory as
+the original file or anywhere else in the project tree.
+
+**18.2.2** The `.aao-backups/` directory MUST be listed in `.gitignore`.
+Backup files are operational artifacts and MUST NOT be committed to git.
+
+**18.2.3** Directory structure inside `.aao-backups/`:
+
+```
+.aao-backups/
+└── YYYYMMDD_HHMMSS_<SESSION_ID>/
+    └── <mirrored/path/from/project/root>/
+        └── filename.ext.bak
+```
+
+### 18.3 Naming Convention
+
+**18.3.1** Session folder format: `YYYYMMDD_HHMMSS_<SESSION_ID>`
+- `YYYYMMDD` — date in UTC (e.g. `20260319`)
+- `HHMMSS` — time in 24h UTC (e.g. `143205`)
+- `SESSION_ID` — first 4 characters of the AI session identifier
+- Example: `20260319_143205_a3f9`
+
+**18.3.2** The session folder timestamp is set when the first backup of the
+session is created. It does not change during the session.
+
+**18.3.3** All backups within a single session share one session folder.
+
+**18.3.4** The original file's relative path from project root is mirrored
+inside the session folder.
+
+**18.3.5** Backup file name: `original_filename.ext.bak`
+The `.bak` extension is appended. The original extension is never replaced.
+- `database.js` → `database.js.bak`
+- `CLAUDE.md` → `CLAUDE.md.bak`
+- `config.yaml` → `config.yaml.bak`
+
+### 18.4 Pre-Backup Confirmation
+
+**18.4.1** Before creating any backup, the AI assistant MUST state the full
+target backup path in chat and proceed only after implicit or explicit
+operator acknowledgment.
+
+### 18.5 Cleanup Rules
+
+**18.5.1** Retain at minimum the 3 most recent session backups per original
+file. Backups beyond this limit are eligible for purge.
+
+**18.5.2** Backup files MUST NOT be deleted without explicit operator
+confirmation after listing every eligible file.
+
+**18.5.3** The current session's backup folder is never eligible for
+automatic cleanup.
+
+**18.5.4** Cleanup MUST NOT run automatically — only on operator command.
+
+### 18.6 Operator Commands
+
+**`/aao-backup-status`** — List all backups with session, age, and purge
+eligibility. Read-only.
+
+**`/aao-backup-purge`** — List purge-eligible files, wait for explicit
+confirmation, delete, report outcome.
+
+### 18.7 Relationship to Section 17
+
+Section 17 (git as snapshot layer) is the primary recovery mechanism.
+Section 18 (backup naming standard) applies when an explicit backup is
+requested. Both can be active simultaneously in the same session.
+
+### 18.8 NIST AI RMF Alignment
+
+- **NIST MANAGE 2.2** — Mechanisms to respond to and recover from AI failures
+- **NIST GOVERN 1.3** — Risk tolerance defined for AI operational context
+
+---
+
+*AAO Specification v1.3 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
-*v1.2 adds Section 17: Interactive Development Mode — Git as Snapshot Layer*
+*v1.3 adds Section 18: Backup Naming Standard*
