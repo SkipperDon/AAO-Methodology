@@ -148,4 +148,49 @@ This path always works because the base is immutable. The AI cannot corrupt the 
 
 ---
 
+---
+
+## 6.4 Interactive Development Mode — Git as Snapshot Layer
+
+When Claude Code operates as an interactive development tool (not a deployed
+autonomous agent), the Layer 3 Action Layer and its automated snapshot infrastructure
+are not present. This subsection defines how the snapshot guarantee is maintained
+in that context.
+
+See **SPECIFICATION.md Section 17** for the complete normative requirements.
+
+### Summary
+
+| Production Autonomous Agent | Interactive Development Tool |
+|---|---|
+| Action Layer takes snapshot automatically | Operator ensures clean git working tree |
+| Health check triggers auto-rollback | Operator reviews changes before committing |
+| Rollback restores from snapshot | `git checkout` or `git restore` against last commit |
+| Audit ledger records all actions | Session log + git history |
+
+### The Non-Negotiable Rule
+
+**If the working tree is not clean at session start, Claude Code must stop.**
+
+A dirty working tree means uncommitted changes exist. If Claude Code modifies
+those files, the prior state is permanently lost — there is no snapshot to roll
+back to.
+
+This is the single most common cause of unrecoverable state in Interactive
+Development Mode. It must be checked before every session, every time.
+
+### Pre-Edit Snapshot Protocol
+
+```
+1. git status → must be clean before proceeding
+2. Confirm exact files in scope for this session
+3. Checkpoint commit required before structural file edits
+4. Operator reviews file-change summary before commit
+5. No push without separate explicit operator instruction
+```
+
+See CLAUDE.md — Pre-Edit Snapshot Rule for the governing instruction.
+
+---
+
 *[Back: 05 — Prompt Injection](05-prompt-injection.md) | [Next: 07 — SDLC Integration](07-sdlc-integration.md)*

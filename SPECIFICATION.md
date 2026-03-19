@@ -1,6 +1,6 @@
 # AAO Specification
 ## Autonomous Action Operating Methodology — Complete Specification
-### Version 1.1 | © 2026 Donald Moskaluk | AtMyBoat.com
+### Version 1.2 | © 2026 Donald Moskaluk | AtMyBoat.com
 
 
 > **⚠️ DISCLAIMER — Framework Under Development**
@@ -815,5 +815,161 @@ By requiring structured external feedback mechanisms with documented adjudicatio
 
 ---
 
-*AAO Specification v1.1 | © 2026 Donald Moskaluk | AtMyBoat.com*
+---
+
+## 17. INTERACTIVE DEVELOPMENT MODE — GIT AS SNAPSHOT LAYER
+
+### 17.1 Purpose
+
+Sections 3–6 of this specification define snapshot and rollback requirements for
+production autonomous agents operating with a full Layer 3 Action Layer. In those
+deployments, the Action Layer infrastructure takes a snapshot before every
+consequential action and rolls back automatically when health checks fail.
+
+When Claude Code or an equivalent AI coding assistant operates as an **interactive
+development tool** — not as a deployed autonomous agent — the Layer 3 infrastructure
+is not present. There is no Action Layer, no automated snapshot, and no rollback
+mechanism. Claude Code writes directly to live files using str_replace and write_file
+tool calls.
+
+This creates a real and immediate risk: if a session goes sideways — scope creep,
+cascading edits, misapplied changes, autonomous operation overriding sprint
+instructions — the operator's only recovery path is git history. And only if a
+clean commit existed before the session began.
+
+This section defines how AAO governance applies in Interactive Development Mode,
+where git is the de facto snapshot layer.
+
+### 17.2 The Interactive Development Mode Definition
+
+**Interactive Development Mode** is any use of an AI coding assistant (Claude Code
+or equivalent) where:
+
+- The AI operates as a development tool, not a deployed autonomous agent
+- The Layer 3 Action Layer is not present
+- The AI writes directly to the file system without Action Layer mediation
+- The operator is present and able to review output before it is committed
+
+Interactive Development Mode does NOT reduce the obligation for auditability,
+governance, or operator control. It shifts the implementation of snapshot and
+rollback from Action Layer infrastructure to git discipline.
+
+### 17.3 Git as the Snapshot Layer
+
+In Interactive Development Mode, git provides the snapshot guarantee required by
+Section 6, subject to the following conditions:
+
+**Condition 1 — Clean working tree before session start**
+A git snapshot is only valid if the working tree is clean at session start.
+Uncommitted changes at session start mean there is no reliable rollback point.
+If Claude Code modifies files that were already modified but uncommitted,
+the prior state is permanently lost.
+
+**Condition 2 — Scope-bounded commits**
+A single commit covering many unrelated changes does not provide meaningful
+rollback granularity. Commits must be scoped to the sprint or task to allow
+targeted rollback without losing unrelated work.
+
+**Condition 3 — Commit before high-risk operations**
+Before any operation that could affect multiple files — refactoring, dependency
+updates, schema migrations — a checkpoint commit must exist. Automatic rollback
+in Layer 3 operates per-action. In Interactive Development Mode, this granularity
+must be approximated through disciplined commits.
+
+### 17.4 MUST Requirements for Interactive Development Mode
+
+**17.4.1** At session start, Claude Code MUST run `git status` and report the result
+to the operator before taking any file-modifying action.
+
+**17.4.2** If the working tree contains uncommitted changes, Claude Code MUST STOP
+and present the uncommitted file list to the operator. It MUST NOT proceed with
+any file edits until the operator has either committed the outstanding changes or
+explicitly acknowledged the risk and authorized proceeding.
+
+**17.4.3** If the working tree is clean, Claude Code MUST confirm this in chat
+before beginning work. This confirmation is the equivalent of the pre-action
+snapshot acknowledgment required by Section 6.1.
+
+**17.4.4** Claude Code MUST NOT modify files outside the scope defined for the
+current sprint or task. Scope expansion — including fixing things noticed while
+working — constitutes ungoverned modification outside the snapshot boundary.
+
+**17.4.5** At the conclusion of each sprint task, Claude Code MUST present a
+summary of all files modified during that task before any commit is made.
+This is the equivalent of the post-action audit record required by Section 5.1.
+
+**17.4.6** Claude Code MUST NOT commit on behalf of the operator without explicit
+approval of the file-change summary first.
+
+**17.4.7** Claude Code MUST NOT push to any remote without a separate, explicit
+operator instruction. A commit approval is not a push approval.
+
+### 17.5 The Pre-Edit Snapshot Protocol
+
+The following sequence is REQUIRED at the start of every Interactive Development
+Mode session before any file is modified:
+
+```
+STEP 1 — git status
+Run: git status
+Expected result: "nothing to commit, working tree clean"
+If clean: state "Working tree clean — git snapshot valid. Proceeding."
+If not clean: STOP. List uncommitted files. Wait for operator instruction.
+
+STEP 2 — Confirm scope
+State the exact files this session will modify based on the sprint scope.
+Do not begin work until this list is confirmed by the operator.
+
+STEP 3 — Checkpoint reminder
+If the session involves more than three files or any operation that touches
+shared/structural files (config, schema, CLAUDE.md, package.json, etc.),
+state: "This session touches structural files. I will stop and request a
+checkpoint commit after each logical unit of work."
+```
+
+### 17.6 Relationship to Section 6
+
+| Section 6 Requirement | Interactive Development Mode Equivalent |
+|---|---|
+| Snapshot before every Low+ action (6.1.1) | Clean working tree confirmed before session start (17.4.1–17.4.3) |
+| Snapshot captures runtime config (6.1.2) | git history captures file state at last commit |
+| Health check after action (6.2) | Operator reviews file-change summary before commit (17.4.5) |
+| Auto-rollback on health check failure (6.3) | Operator uses `git checkout` or `git restore` against last commit |
+| User notified of rollback (6.3.5) | Operator-initiated — no automated notification needed |
+| Manual rollback to any snapshot (6.3.6) | `git checkout <commit>` or `git stash` |
+
+### 17.7 What Git Cannot Provide
+
+Operators must understand what the git-as-snapshot approach does NOT cover:
+
+- **Uncommitted state:** If a session modifies files that were not committed beforehand,
+  there is no rollback. The operator's only recovery is manual reconstruction or
+  IDE local history if available.
+
+- **External side effects:** If Claude Code executes commands with external effects
+  (running migrations, sending API calls, modifying system configuration outside
+  the repository), git provides no rollback for those effects. Section 6 requirements
+  apply in full for any Interactive Development Mode session that includes external
+  actions.
+
+- **Binary files and secrets:** Git does not help if secrets were accidentally
+  committed. The no-secrets rule (CLAUDE.md Git Policy) is a hard boundary regardless
+  of rollback capability.
+
+### 17.8 NIST AI RMF Alignment
+
+This section addresses:
+
+* **NIST MANAGE 2.2** — Mechanisms to respond to and recover from AI system failures
+* **NIST GOVERN 1.3** — Risk tolerance established for AI system deployment context
+
+By defining git as the explicit snapshot layer for Interactive Development Mode,
+this section ensures that the snapshot-and-rollback guarantee of AAO Core (Sections
+3–6) is maintained across both production autonomous and interactive development
+deployment contexts.
+
+---
+
+*AAO Specification v1.2 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v1.2 adds Section 17: Interactive Development Mode — Git as Snapshot Layer*
