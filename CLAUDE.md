@@ -4,6 +4,49 @@
 
 ---
 
+## SESSION-START MEMORY LOAD (REQUIRED — before acknowledgment, before everything)
+
+Before any acknowledgment, before reading any task, before any other action —
+read these four files in order. This is not optional. This is how memory
+persists across sessions.
+
+**Step 1 — Read MEMORY.md**
+File: `MEMORY.md` (project root)
+If it exists: read it fully. Hold its contents as active context for this session.
+If it does not exist: note "MEMORY.md not found — no prior stable facts loaded."
+
+**Step 2 — Read PROJECT_CHECKLIST.md**
+File: `PROJECT_CHECKLIST.md` (project root)
+If it exists: read it fully. Note all open and in-progress items.
+If it does not exist: note "PROJECT_CHECKLIST.md not found."
+
+**Step 3 — Read last 2 entries of SESSION_LOG.md**
+File: `SESSION_LOG.md` (project root)
+If it exists: read the two most recent entries only. Note decisions, pending items,
+and any corrections from those sessions.
+If it does not exist: note "SESSION_LOG.md not found — no prior session context."
+
+**Step 4 — State memory load summary in chat**
+
+After reading all three files, state:
+
+> "Memory loaded.
+> Last session: [one-line summary from SESSION_LOG — date and what was done]
+> Open items: [count from PROJECT_CHECKLIST — list if 5 or fewer]
+> Stable facts loaded: [yes / no — note count of MEMORY.md entries]
+> Ready for: [today's stated task or 'awaiting task']"
+
+If all three files are missing (new project): state "No prior session memory found.
+Starting fresh." and continue.
+
+**Why this exists:**
+Claude Code re-reads governing documents fresh every session with no memory of
+prior sessions. MEMORY.md, SESSION_LOG.md, and PROJECT_CHECKLIST.md are the
+external memory system. Session-close writes to them. Session-start reads from them.
+Without this read step, the memory system is write-only and prior work is invisible.
+
+---
+
 ## REQUIRED SESSION-START ACKNOWLEDGMENT
 
 At the start of every session, before any other response, Claude MUST state:

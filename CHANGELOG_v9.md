@@ -150,3 +150,40 @@ None. Version 9 is fully additive. All v8 implementations remain compliant.
 ---
 
 *AAO Methodology Repository v9 | © 2026 Donald Moskaluk*
+
+---
+
+## Addendum — Session Memory Loop (added post v9 release)
+
+**Date:** 2026-03-19
+
+### Problem Identified
+
+The AAO methodology had a complete session-close write sequence but no
+corresponding session-start read sequence. MEMORY.md, SESSION_LOG.md, and
+PROJECT_CHECKLIST.md were written at every session close but never explicitly
+read at session start. The memory system was write-only.
+
+### Changes
+
+**Modified:**
+- `CLAUDE.md` — Session-Start Memory Load block added before Required
+  Session-Start Acknowledgment. Defines mandatory read sequence for
+  MEMORY.md, PROJECT_CHECKLIST.md, and SESSION_LOG.md with a required
+  chat summary confirming memory loaded.
+
+**New files:**
+- `commands/session-start.md` — new slash command `/project:session-start`
+  implementing the full session orientation sequence including pre-flight
+  git status check, memory load, and session orientation summary
+- `docs/aao-commands-reference.html` — visual command reference showing
+  all AAO commands, sprint mode activation phrases, the memory loop
+  diagram, and the risk classification table
+
+### The Memory Loop
+
+Session-close writes → MEMORY.md, SESSION_LOG.md, PROJECT_CHECKLIST.md
+Session-start reads ← same files
+
+Without the read side, prior corrections and decisions are invisible to
+every new session. The loop is now complete.
