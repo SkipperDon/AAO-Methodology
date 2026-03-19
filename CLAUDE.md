@@ -173,7 +173,7 @@ During implementation (post-APPROVED), Claude outputs only what was authorized. 
 | Risk Level | What It Covers | Required Behaviour |
 | --- | --- | --- |
 | **None** | Read-only — reading files, searching, checking status | Execute without stating. No confirmation. |
-| **Low** | State-changing, reversible — editing files, restarting services, creating docs | State what you are about to do before doing it. |
+| **Low** | State-changing, reversible — editing files, restarting services, creating docs | State what you are about to do before doing it. In Sprint Mode: wait for operator acknowledgment before proceeding. |
 | **Medium** | Meaningful config changes — modifying systemd units, network config, deployment scripts | State the action, the impact, and the rollback path. Wait for implicit approval. |
 | **High** | Irreversible or externally visible — rm -rf, git push, dropping data, external API calls | STOP. State the action, impact, and rollback path. Require explicit user confirmation. |
 
@@ -202,8 +202,9 @@ A test written after the fix is not a test — it is documentation.
 
 ## OPERATIONAL RULES
 
-### Autonomous Operation
+### Autonomous Operation (DEFAULT MODE — suspended when Sprint Mode is active)
 
+This mode applies UNLESS the operator has declared Sprint Mode for this session.
 Proceed without asking for approval on implementation details AFTER an APPROVED authorization has been received. Do the work, report results.
 
 **Exception — the Pre-Implementation Gate overrides this rule.** Every task requires Phase 1 interpretation and an APPROVED before implementation begins. The autonomous operation rule governs how Claude works within an authorized scope — it does not permit bypassing the gate.
@@ -215,11 +216,40 @@ Only confirm before:
 * `git push` to any remote
 * Any action outside the authorized file scope
 
-Do NOT ask:
+Do NOT ask (Autonomous Mode only — suspended in Sprint Mode):
 
 * Which file to edit or which approach to take within an authorized task
 * Implementation details within authorized scope
 * "Shall I commit?", "Would you like me to?", "Is this correct?" during authorized work
+
+### Sprint Mode (OPERATOR-ACTIVATED — overrides Autonomous Operation)
+
+Sprint Mode is activated when the operator opens a session with the phrase:
+**"Sprint mode: ON"** followed by a defined sprint scope.
+
+When Sprint Mode is active:
+
+* Execute ONLY the tasks explicitly named in the sprint scope for this session
+* After completing each named task: STOP. Present results in chat. Wait.
+* Do NOT proceed to the next task — even if the next step is obvious
+* Do NOT expand scope, refactor adjacent code, or fix anything outside the named tasks
+* Do NOT generate additional output, tokens, or actions without explicit operator approval
+* If you identify something outside scope that needs attention: LOG IT in chat as
+  "OUT OF SCOPE — noted for next sprint: [description]" — do not act on it
+* The only valid trigger to continue is an explicit operator message: "proceed",
+  "continue", "next", or naming the next task
+* Silence or no response from the operator means STOP — never interpret silence as approval
+
+Sprint Mode ends only when the operator states "sprint mode off" or closes the session.
+Sprint Mode overrides ALL Autonomous Operation defaults for the duration of the session.
+It is not suspended by /compact, task switches, or any other event.
+After /compact, re-read this section and re-confirm Sprint Mode is still active before
+continuing.
+
+**Why this exists:** Claude Code re-reads governing documents fresh each session.
+Without Sprint Mode defined here, verbal sprint instructions are overridden by the
+written Autonomous Operation rule on every session start. This section makes sprint
+control structural — not dependent on verbal instruction.
 
 ### Git Policy
 
