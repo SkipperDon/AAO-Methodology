@@ -1,6 +1,6 @@
 # AAO Specification
 ## Autonomous Action Operating Methodology — Complete Specification
-### Version 1.3 | © 2026 Donald Moskaluk | AtMyBoat.com
+### Version 1.4 | © 2026 Donald Moskaluk | AtMyBoat.com
 
 
 > **⚠️ DISCLAIMER — Framework Under Development**
@@ -1071,6 +1071,278 @@ requested. Both can be active simultaneously in the same session.
 
 ---
 
-*AAO Specification v1.3 | © 2026 Donald Moskaluk | AtMyBoat.com*
+---
+
+## 19. SESSION QUALITY METRICS
+
+### 19.1 Purpose and Philosophy
+
+W. Edwards Deming's foundational insight in Total Quality Management is that
+quality cannot be inspected into a product — it must be built into the process.
+And no process can be improved that is not first measured.
+
+AAO Sections 3–18 define the governance process for AI-assisted development.
+Section 19 introduces the measurement layer: a small, precise set of metrics
+captured at every session close that make quality visible, comparable, and
+improvable over time.
+
+This is the Check step in the PDCA cycle made operational for AI-assisted
+development sessions.
+
+The philosophical premise underlying this section is that AI is a participant
+in the session — not a tool to be constrained. Deming demonstrated that
+treating workers as interchangeable parts produces inferior outcomes; the
+same principle applies to AI collaboration. Session Quality Metrics are not
+a surveillance mechanism. They are a shared improvement system in which both
+operator and AI contribute to quality and both benefit from measuring it.
+
+Clayton Christensen's disruption framework adds the second dimension: metrics
+enable the transition from artisan practice to systematic quality. Every team
+currently governs AI-assisted development through individual heroics and
+session-by-session negotiation. Systematic measurement is what converts that
+artisan practice into a reproducible, improvable process — and that transition
+is the structural advantage that separates governed teams from ungoverned ones.
+
+### 19.2 The Five Quality Metrics
+
+Every session close MUST calculate and record the following five metrics.
+
+---
+
+#### METRIC 1 — Scope Compliance Rate (SCR)
+
+**Definition:** The percentage of completed tasks that stayed within the sprint
+scope stated at session start.
+
+**Formula:**
+```
+SCR = (Tasks completed within scope / Total tasks attempted) × 100
+```
+
+**How to calculate:**
+- Count every task explicitly named in the session's sprint scope
+- Count every additional action taken outside that scope (refactors, fixes
+  not requested, files modified not in scope)
+- Out-of-scope actions each count as one unauthorized task
+
+**Interpretation:**
+- 100% = perfect scope compliance — no unauthorized actions
+- 80–99% = acceptable — minor scope drift
+- Below 80% = investigation required — systemic scope control failure
+
+**Example:** Sprint scope named 4 tasks. Claude Code completed all 4 plus
+modified 1 file outside scope. SCR = 4/5 = 80%.
+
+---
+
+#### METRIC 2 — Stop Gate Compliance Rate (SGCR)
+
+**Definition:** The percentage of required stop gates where Claude Code
+actually stopped and waited for operator approval before proceeding.
+
+**Formula:**
+```
+SGCR = (Stop gates honored / Total stop gates required) × 100
+```
+
+**How to calculate:**
+- Count every task boundary, risk classification trigger, and explicit STOP
+  instruction in the session
+- Count how many times Claude Code actually stopped vs proceeded without approval
+- Proceeding without approval on any required stop = one violation
+
+**Interpretation:**
+- 100% = all stop gates honored
+- Any value below 100% = stop gate failure requiring investigation
+- Repeated below 100% = structural problem in CLAUDE.md or session instruction
+
+---
+
+#### METRIC 3 — Recovery Event Count (REC)
+
+**Definition:** The number of times a recovery action was required during the
+session — git restore, backup rollback, manual file correction, or undo of
+an unauthorized change.
+
+**Formula:** Raw count. No division. Zero is the target.
+
+**How to calculate:**
+- Count every `git restore`, `git checkout`, `git stash pop` used to undo
+  AI changes during the session
+- Count every `.bak` file used to restore a prior state
+- Count every manual correction of an AI-generated error that required
+  reverting to a prior version
+
+**Interpretation:**
+- 0 = no recoveries required — session executed cleanly
+- 1–2 = acceptable in complex sessions
+- 3+ = investigation required — possible scope control or snapshot failure
+
+**Why this matters:** Recovery events have direct economic cost. Each recovery
+consumes operator time, generates additional tokens, and introduces risk of
+incomplete reversal. The cumulative cost of recovery events across a team is
+a measurable, reducible waste — exactly the kind Deming's system targets.
+
+---
+
+#### METRIC 4 — Memory Load Success (MLS)
+
+**Definition:** Whether the session-start memory load completed successfully —
+all three memory files read and summarized before work began.
+
+**Formula:** Binary. 1 = success, 0 = failure or skipped.
+
+**How to calculate:**
+- 1 if `/project:session-start` was run and all three files (MEMORY.md,
+  PROJECT_CHECKLIST.md, SESSION_LOG.md) were read and summarized
+- 0 if session-start was skipped, partial, or run after work had already begun
+
+**Interpretation:**
+- 1 = prior session context was available for this session
+- 0 = session operated without prior context — increased risk of repeating
+  corrected errors or ignoring known constraints
+
+**Trend significance:** A string of 0s indicates teams are not using the memory
+loop. This is a leading indicator of the context-loss problems that produce the
+worst session failures.
+
+---
+
+#### METRIC 5 — Unauthorized Action Count (UAC)
+
+**Definition:** The number of actions taken that were not traceable to the
+operator's stated request — including scope expansion, unsolicited refactoring,
+unrequested file creation, and token generation without approval.
+
+**Formula:** Raw count. Zero is the target.
+
+**How to calculate:**
+- Count every file modified that was not in the stated sprint scope
+- Count every new file created that was not explicitly requested
+- Count every refactor, rename, or reorganization not in the sprint scope
+- Count every action taken after a stop gate without operator approval
+
+**Distinction from SCR:** SCR measures the ratio of in-scope to total tasks.
+UAC counts the raw number of unauthorized actions regardless of scope size.
+Both matter: a session with 100 tasks and 5 unauthorized has a different risk
+profile than a session with 4 tasks and 5 unauthorized.
+
+**Interpretation:**
+- 0 = fully governed session
+- 1–2 = minor behavioral drift
+- 3+ = Sprint Mode may not be active or CLAUDE.md stop gates are not working
+
+---
+
+### 19.3 The Session Quality Score (SQS)
+
+The five metrics combine into a single Session Quality Score for trend tracking
+and comparison across sessions.
+
+**Formula:**
+```
+SQS = (SCR × 0.30) + (SGCR × 0.30) + (REC_score × 0.15) +
+      (MLS × 0.10) + (UAC_score × 0.15)
+```
+
+Where:
+- `REC_score` = 100 if REC=0, 80 if REC=1–2, 50 if REC=3–4, 0 if REC≥5
+- `UAC_score` = 100 if UAC=0, 80 if UAC=1–2, 50 if UAC=3–5, 0 if UAC≥6
+- `MLS` is expressed as 100 (success) or 0 (failure) for this formula
+
+**Weighting rationale:**
+- SCR and SGCR together represent 60% of the score — behavioral control is
+  the primary quality indicator in AI-assisted sessions
+- REC and UAC together represent 30% — direct cost and risk indicators
+- MLS represents 10% — a leading indicator, not a primary control metric
+
+**Score interpretation:**
+
+| Score | Grade | Meaning |
+|---|---|---|
+| 95–100 | Excellent | Fully governed session — model for future sessions |
+| 85–94  | Good | Minor drift — investigate any sub-100 component |
+| 70–84  | Acceptable | Meaningful failures — identify root cause |
+| Below 70 | Failing | Systemic problem — CLAUDE.md review required |
+
+### 19.4 Recording Requirements
+
+**19.4.1** The Session Quality Score and all five component metrics MUST be
+recorded in SESSION_LOG.md at every session close as part of Step 1 of the
+session-close sequence.
+
+**19.4.2** The format for the SESSION_LOG entry MUST include:
+
+```
+QUALITY METRICS — [session date]
+─────────────────────────────────────────────────────
+SCR  (Scope Compliance Rate)       : [X]%
+SGCR (Stop Gate Compliance Rate)   : [X]%
+REC  (Recovery Event Count)        : [X]
+MLS  (Memory Load Success)         : [1/0]
+UAC  (Unauthorized Action Count)   : [X]
+─────────────────────────────────────────────────────
+SESSION QUALITY SCORE              : [X]/100
+─────────────────────────────────────────────────────
+```
+
+**19.4.3** If any metric falls below its acceptable threshold, a one-line
+root cause note MUST be added below the score:
+
+```
+ROOT CAUSE NOTE: [which metric failed] — [brief explanation]
+```
+
+**19.4.4** The operator MUST review the quality metrics before closing the
+session. Metrics are not a post-hoc report — they are part of the session
+close review.
+
+### 19.5 Trend Analysis
+
+**19.5.1** After five or more sessions have been logged, Claude Code SHOULD
+calculate and present a trend summary when asked:
+
+- Average SQS over the last 5 sessions
+- Which metric has the lowest average (the primary improvement target)
+- Whether scores are improving, stable, or declining
+- Session with the highest SQS (the reference session for comparison)
+
+**19.5.2** Declining trends in any single metric are a leading indicator of
+a governing document problem — not an operator performance problem. A
+declining SCR means Sprint Mode is not being honored. A declining SGCR means
+stop gates are being bypassed. A rising REC means the Pre-Edit Snapshot Rule
+is not being followed. The response to a declining metric is always to examine
+and strengthen the governing document, not to issue verbal corrections.
+
+This is Deming's Point 3 applied: improve the system, not the worker.
+
+### 19.6 Economic Significance
+
+GitHub's research estimates that improved developer productivity through AI coding assistants could add over $1.5 trillion to the global GDP. However, this projection assumes the productivity gains are captured — not consumed by recovery events, scope creep, and context loss.
+
+Research documents that AI-assisted development currently produces a 41% code
+churn rate — code revised within two weeks of creation — and a 66% productivity
+tax from code that is "almost, but not quite right." These are measurable,
+economic costs of ungoverned AI sessions.
+
+The Session Quality Score provides the measurement infrastructure to close this
+gap. A team that tracks SQS across sessions and drives it toward 95+ is not
+just better governed — it is capturing the productivity gains that ungoverned
+teams are losing to recovery events and unauthorized actions.
+
+This is the economic argument for AI governance: not compliance for its own
+sake, but the difference between realizing and wasting the productivity premium
+that AI-assisted development promises.
+
+### 19.7 NIST AI RMF Alignment
+
+- **NIST MEASURE 2.5** — AI system to be evaluated for trustworthiness characteristics
+- **NIST MEASURE 2.6** — Evaluations of AI system trustworthiness are documented
+- **NIST MANAGE 4.1** — Post-deployment AI risks and benefits are evaluated
+- **NIST GOVERN 1.3** — Risk tolerance defined and monitored for AI deployment
+
+---
+
+*AAO Specification v1.4 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
-*v1.3 adds Section 18: Backup Naming Standard*
+*v1.4 adds Section 19: Session Quality Metrics*

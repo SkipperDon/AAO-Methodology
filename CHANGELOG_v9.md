@@ -187,3 +187,37 @@ Session-start reads ← same files
 
 Without the read side, prior corrections and decisions are invisible to
 every new session. The loop is now complete.
+
+---
+
+## Addendum — Section 19 Session Quality Metrics
+
+**Date:** 2026-03-19
+
+### What Was Added
+
+**SPECIFICATION.md Section 19** — Session Quality Metrics. Defines five metrics
+calculated at every session close: Scope Compliance Rate (SCR), Stop Gate
+Compliance Rate (SGCR), Recovery Event Count (REC), Memory Load Success (MLS),
+and Unauthorized Action Count (UAC). Combined into a weighted Session Quality
+Score (SQS) on a 100-point scale.
+
+**commands/session-close.md** — Step 1B added. Calculation procedure for all
+five metrics with exact formulas, interpretation thresholds, and SESSION_LOG
+format.
+
+**docs/aao-session-quality.html** — NEW. Visual explainer covering Deming/PDCA
+foundation, all five metrics, the SQS formula, grade table, SESSION_LOG example,
+improvement loop, and economic case.
+
+### The Foundation
+
+Deming: you cannot improve a system you cannot measure. Sections 3–18 define
+the governance process. Section 19 provides the measurement layer — the Check
+step in the PDCA cycle made operational for AI-assisted development sessions.
+
+Christensen: systematic measurement converts artisan practice into a reproducible,
+improvable process. That transition is the structural advantage that separates
+governed teams from ungoverned ones.
+
+Version bumped to v1.4.
