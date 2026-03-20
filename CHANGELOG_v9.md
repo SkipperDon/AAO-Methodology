@@ -221,3 +221,53 @@ improvable process. That transition is the structural advantage that separates
 governed teams from ungoverned ones.
 
 Version bumped to v1.4.
+
+---
+
+## Addendum — Section 20 Anti-Sycophancy Protocol + OIC Metric
+
+**Date:** 2026-03-20
+
+### Problem Addressed
+
+Sycophancy is the failure mode where an AI system produces outputs that
+feel satisfying and complete rather than outputs that are actually honest
+and rigorous. AAO governed behavioral compliance (what Claude Code does)
+but had not formally addressed output integrity (whether what Claude Code
+produces is honest).
+
+Specific gaps:
+- No rule requiring uncertainty to be declared
+- No standard requiring session summaries to disclose gaps
+- No metric assessing whether outputs were substantive vs superficial
+- No checklist item for sycophancy detection
+
+### Changes
+
+**SPECIFICATION.md Section 19** — OIC (Output Integrity Check) added as
+sixth metric. SQS formula updated: OIC acts as a binary multiplier — OIC=0
+voids the entire session score. Maximum SQS is now 90. Weights redistributed:
+SCR and SGCR reduced from 0.30 to 0.25 each to accommodate OIC. Grade
+thresholds updated. SESSION_LOG format updated to include OIC line.
+
+**SPECIFICATION.md Section 20** — NEW. Anti-Sycophancy Protocol. Defines:
+Uncertainty Declaration Rule, Summary Accuracy Standard, sycophancy detection
+patterns, and operator responsibility for OIC assessment.
+
+**CLAUDE.md (both repos)** — Three new sections added: Uncertainty Declaration
+Rule, Summary Accuracy Standard, Output Integrity Check. AAO Compliance
+Checklist updated with three anti-sycophancy items.
+
+**docs/aao-session-quality.html** — OIC card added to metrics grid. SQS
+formula updated to show OIC multiplier. SESSION_LOG example updated.
+
+Version bumped to v1.5.
+
+### The Core Distinction
+
+The five behavioral metrics ask: did Claude Code follow the process?
+OIC asks: was the work within the process honest and rigorous?
+
+Both questions are required for a complete quality assessment.
+A session can score 90/90 on behavioral metrics while being sycophantic.
+OIC closes that gap — and voids the score when sycophancy is detected.
