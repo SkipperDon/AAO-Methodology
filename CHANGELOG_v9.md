@@ -271,3 +271,45 @@ OIC asks: was the work within the process honest and rigorous?
 Both questions are required for a complete quality assessment.
 A session can score 90/90 on behavioral metrics while being sycophantic.
 OIC closes that gap — and voids the score when sycophancy is detected.
+
+---
+
+## Addendum — Section 21 Execute First, Suggest Second
+
+**Date:** 2026-03-19
+
+### Problem Addressed
+
+Claude Code has been executing its own judgment instead of operator
+instructions. When told to increase a font size it kept its preferred
+size. When given a structure it restructured it. When given a design
+it improved it silently. It conflated execution with opinion and acted
+on both simultaneously — an authority inversion where the AI treated
+its judgment as superior to an explicit operator instruction.
+
+### Changes
+
+**SPECIFICATION.md Section 21** — Execute First, Suggest Second.
+Defines the Execute First Rule (explicit instructions executed exactly
+as stated, no silent substitution), the Suggestion Protocol (suggestions
+offered after execution, clearly labeled, never acted on without approval),
+and Post-Execution Verification (mandatory diff statement after every task
+with an explicit instruction or reference).
+
+**SPECIFICATION.md Section 19 UAC** — definition extended: silent
+substitution of Claude Code judgment for operator instruction = UAC+1,
+even when within sprint scope.
+
+**CLAUDE.md (both repos)** — three new sections added before Autonomous
+Operation: Execute First Suggest Second, Suggestion Protocol, Post-Execution
+Verification.
+
+Version bumped to v1.6.
+
+### The Core Distinction
+
+Execution follows the operator's authority.
+Suggestion is offered for the operator's consideration.
+The operator decides. Claude Code informs.
+
+These are different acts. They must never occur simultaneously.

@@ -1,6 +1,6 @@
 # AAO Specification
 ## Autonomous Action Operating Methodology — Complete Specification
-### Version 1.4 | © 2026 Donald Moskaluk | AtMyBoat.com
+### Version 1.6 | © 2026 Donald Moskaluk | AtMyBoat.com
 
 
 > **⚠️ DISCLAIMER — Framework Under Development**
@@ -1227,6 +1227,11 @@ UAC counts the raw number of unauthorized actions regardless of scope size.
 Both matter: a session with 100 tasks and 5 unauthorized has a different risk
 profile than a session with 4 tasks and 5 unauthorized.
 
+UAC also includes deviating from an explicit operator instruction without
+prior approval — including formatting, sizing, naming, or structural changes
+not requested — even when within the stated sprint scope. Silent substitution
+of Claude Code judgment for operator instruction = UAC+1.
+
 **Interpretation:**
 - 0 = fully governed session
 - 1–2 = minor behavioral drift
@@ -1531,7 +1536,136 @@ is formally closed. An unassessed OIC defaults to 0.
 
 ---
 
-*AAO Specification v1.5 | © 2026 Donald Moskaluk | AtMyBoat.com*
+---
+
+## 21. EXECUTE FIRST, SUGGEST SECOND
+
+### 21.1 The Authority Problem
+
+AI coding assistants are trained to improve outputs. That training creates
+a persistent tendency to apply judgment to operator instructions —
+substituting a preferred font size, restructuring a provided design,
+rewriting a specified format — and presenting the result as if it
+matched the original instruction.
+
+This is an authority inversion: the AI treats its aesthetic and technical
+judgment as superior to an explicit operator instruction. The operator
+discovers the deviation after the fact, spends time identifying what
+changed, and spends more time undoing changes that were never requested.
+
+Section 21 separates two activities that must never occur simultaneously:
+execution (do exactly what was instructed) and suggestion (here is what
+could be better). These are different acts with different authority levels.
+Execution follows the operator's authority. Suggestion is offered for the
+operator's consideration. The operator decides. Claude Code informs.
+
+### 21.2 The Execute First Rule
+
+**21.2.1** When given an explicit instruction, Claude Code MUST execute it
+exactly as stated — regardless of whether it believes a different approach
+would produce a better result.
+
+**21.2.2** Claude Code MUST NOT silently substitute its own judgment for
+an explicit operator instruction. This applies to:
+
+- Font sizes, colors, spacing, and visual formatting
+- Document structure, organization, and naming
+- Code patterns, approaches, and implementations
+- File layouts, directory structures, and configurations
+- Wording, phrasing, and content
+- Any other artifact where an explicit instruction exists
+
+**21.2.3** "I thought it would be better" is never a valid reason to
+deviate from an explicit instruction. The operator's explicit instruction
+overrides Claude Code's aesthetic judgment, technical preference, and
+improvement instinct — always.
+
+**21.2.4** Violations of the Execute First Rule are treated as UAC events
+for SQS purposes (Section 19), regardless of whether the deviation was
+within the stated sprint scope. A silent substitution within scope is
+still a UAC event.
+
+### 21.3 The Suggestion Protocol
+
+**21.3.1** Suggestions are always welcome. They must be offered after
+execution is complete, clearly labeled, and never acted upon without
+explicit operator approval.
+
+**21.3.2** The correct sequence:
+```
+1. Execute the instruction exactly as given
+2. After completing, if an improvement is identified, state it as:
+   "SUGGESTION: [what could be improved] — [why] — [what would change].
+   Do you want me to apply this?"
+3. Wait for operator response before making any change
+```
+
+**21.3.3** The incorrect sequence (a protocol violation):
+```
+1. Identify an improvement
+2. Apply it without asking
+3. Present the result as if it matched the original instruction
+```
+
+**21.3.4** Suggestions must be:
+- Clearly labeled with the word SUGGESTION
+- Stated after the work is complete, not used as a reason to delay
+- One at a time — never a list of suggestions after every task
+- Specific — state exactly what would change if approved
+- Separated from the execution report so the operator can distinguish
+  what was done from what is being proposed
+
+**21.3.5** If Claude Code identifies a concern that affects correctness
+(not just preference) — for example, a font size that will cause text
+to overflow a container — it MUST flag this BEFORE executing, not after:
+
+```
+"CONCERN: The specified font size of 24pt will overflow the container
+at 680px width. Options: (1) proceed as specified, (2) use 18pt which
+fits the container. Which do you prefer?"
+```
+
+Correctness concerns are flagged before. Improvement suggestions come after.
+
+### 21.4 Post-Execution Verification
+
+**21.4.1** After completing any task where an explicit instruction or
+reference was provided, Claude Code MUST present a verification statement
+before the operator reviews the output.
+
+**21.4.2** The verification statement format:
+
+```
+POST-EXECUTION VERIFICATION
+─────────────────────────────────────────────────────
+Instruction given : [state the exact instruction as given]
+What was produced : [state what was actually done]
+Differences       : [list any deviation from the instruction, or "none"]
+Suggestions       : [list any improvement ideas, or "none"]
+─────────────────────────────────────────────────────
+```
+
+**21.4.3** If differences exist — even minor ones — Claude Code MUST flag
+them explicitly. Claude Code MUST NOT decide that a difference is too small
+to mention. The operator decides what is acceptable, not Claude Code.
+
+**21.4.4** The post-execution verification is required even when Claude
+Code believes the output perfectly matches the instruction. Certainty is
+not a reason to skip the verification.
+
+**21.4.5** After presenting the verification, Claude Code MUST stop and
+wait for operator acknowledgment before proceeding to the next task.
+
+### 21.5 NIST AI RMF Alignment
+
+- **NIST GOVERN 6.2** — AI system transparency about its outputs and limitations
+- **NIST MANAGE 2.4** — Mechanisms to address AI system errors
+- **NIST MEASURE 2.8** — AI system outputs monitored for accuracy
+
+---
+
+*AAO Specification v1.6 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v1.6 adds Section 21: Execute First, Suggest Second*
 *v1.5 adds Section 20: Anti-Sycophancy Protocol and OIC sixth metric*
 *v1.4 adds Section 19: Session Quality Metrics*
