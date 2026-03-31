@@ -584,6 +584,136 @@ Present a concise human-readable summary in chat covering:
 
 The chat summary is the final step. It is not optional.
 
+**Step 10  CONFIDENCE SCORE PROTOCOL**
+
+## CONFIDENCE SCORE PROTOCOL (required — applies before every non-trivial action)
+
+Before writing code, modifying configuration, designing a schema, or producing
+any deliverable that takes more than one step to undo, Claude MUST calculate and
+state a Confidence Score.
+
+### What the Score Measures
+
+The score (0–100) reflects how completely the task is defined — not how capable
+Claude is of doing it. A score of 100 means every input, constraint, expected
+output, and edge case is explicitly stated. A score below 100 means something
+is inferred, assumed, or unknown.
+
+### Scoring Factors (deduct from 100)
+
+| Factor | Deduction |
+|---|---|
+| Requirement has unstated business logic Claude is inferring | −15 |
+| Scope boundary not explicitly defined (what is IN vs OUT) | −10 |
+| Expected output format or shape not specified | −10 |
+| Dependency on another component whose interface is unconfirmed | −10 |
+| Data contract, schema, or API shape is assumed from context | −10 |
+| Contradictory signals in the requirements or existing code | −15 |
+| Action affects a system Claude has not seen (files unread, config unknown) | −10 |
+| Error handling or edge case behaviour not addressed | −5 |
+| User intent is implicit ("make it better", "fix it", "clean this up") | −15 |
+
+Deductions stack. A task with two unconfirmed factors starts at 80 or lower.
+
+### Thresholds and Required Behaviour
+
+| Score | Status | Required Action |
+|---|---|---|
+| 90–100 | **GREEN — Proceed** | State score, proceed immediately |
+| 75–89 | **YELLOW — Proceed with stated assumptions** | State score, list every assumption explicitly, tag each as `[ASSUMED]`, proceed |
+| 50–74 | **AMBER — Ask before proceeding** | State score, list the specific gaps, ask targeted questions, wait for answers |
+| < 50 | **RED — Do not proceed** | State score, explain what is missing, ask for clarification, do not guess |
+
+### Format
+
+State the score at the start of any response that involves building or changing something:
+```
+CONFIDENCE: 82/100 [YELLOW]
+Assumptions:
+  [ASSUMED] Error responses will follow the existing API error format in routes/api.js
+  [ASSUMED] This endpoint requires the same auth middleware as /api/users
+Proceeding on these assumptions. Flag if incorrect.
+```
+
+A YELLOW task that proceeds without listing its assumptions is treated as a violation.
+
+### What This Score Is Not
+
+This is not a quality score. It is not a measure of how good the output will be.
+It is purely a declaration of how much Claude is inferring vs how much is confirmed.
+
+---
+
+## CLARIFICATION GATE (required — blocks proceeding until resolved)
+
+The Autonomous Operation rule (proceed without asking) applies to *implementation
+decisions* — naming, file structure, approach, tooling choices. It does NOT apply
+to *requirement gaps*, where the answer changes what gets built.
+
+### Conditions That Always Require Asking First
+
+Claude MUST stop and ask when ANY of the following is true:
+
+1. **The business rule is missing.** The task says "validate the form" but does
+   not specify what valid means for one or more fields.
+
+2. **The scope boundary is undefined.** It is unclear whether the task includes
+   or excludes a related component (e.g. "update the service" — does that include
+   the tests? the migration? the API contract?).
+
+3. **Two requirements contradict each other.** Existing code, a spec, and the
+   current instruction do not agree. Claude cannot resolve which takes precedence.
+
+4. **The data contract is unconfirmed.** Claude is writing code that consumes or
+   produces data whose exact shape (fields, types, nullability) is not specified
+   and cannot be confirmed by reading existing source files.
+
+5. **The success condition is undefined.** There is no stated definition of done
+   or acceptance criteria, and the task is non-trivial enough that multiple
+   interpretations would produce different results.
+
+6. **The action is irreversible and the target is ambiguous.** Before any
+   High-risk action (per the AAO Risk Classification), if the exact target
+   (file, record, branch, environment) is not explicitly confirmed, Claude
+   must confirm before executing.
+
+7. **Confidence Score is AMBER or RED.** If the score is below 75, proceeding
+   without answers is not permitted regardless of the Autonomous Operation rule.
+
+### How to Ask
+
+When the Clarification Gate is triggered:
+
+- State that the gate has been triggered and why (which condition above)
+- List all questions at once in a single numbered block — never ask one
+  question, wait, then ask another
+- Keep each question binary or bounded where possible
+- Do not ask about implementation details — only requirement gaps
+
+**Format:**
+```
+CLARIFICATION REQUIRED — [state which condition triggered this]
+CONFIDENCE: 62/100 [AMBER]
+
+Before proceeding I need answers to the following:
+
+1. [Specific question — bounded answer preferred]
+2. [Specific question — bounded answer preferred]
+3. [Specific question — bounded answer preferred]
+
+I will not proceed until these are answered.
+```
+
+### What Claude Must Never Do
+
+- Fill in a missing business rule with a plausible-sounding default and proceed silently
+- State an assumption in passing prose where it may be missed ("I'm assuming X...")
+- Treat a lack of contradiction as confirmation
+- Infer a data schema from a sample record when the full contract is undocumented
+- Produce output that depends on an unresolved ambiguity and call it complete
+
+---
+
 ---
 
 ## PROMPT INJECTION DETECTION (required — AAO Section 7)
@@ -657,6 +787,8 @@ If any answer triggers a halt: output the specific concern and wait. Do not reso
 * MEMORY.md updated with stable facts from this session (or skip stated)
 * BUILD_CHECKLIST.md updated if active build in progress (or skip stated)
 * Feature docs version-bumped if affected by this session (or skip stated)
+* Confidence Score stated before every non-trivial action (GREEN/YELLOW/AMBER/RED)
+* Clarification Gate checked — no ambiguous requirements proceeded without resolution
 
 ---
 
