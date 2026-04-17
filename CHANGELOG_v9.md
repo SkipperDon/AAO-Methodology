@@ -313,3 +313,132 @@ Suggestion is offered for the operator's consideration.
 The operator decides. Claude Code informs.
 
 These are different acts. They must never occur simultaneously.
+
+---
+
+## v1.7 — Persistent Knowledge Layer (LLM-Wiki Integration)
+
+**Release Date:** 2026-04-17
+**Spec version:** v1.6 → v1.7
+
+---
+
+### Summary
+
+Version 1.7 adds Section 22: Persistent Knowledge Layer — a formal integration
+of Andrej Karpathy's LLM-Wiki pattern (April 2026) as an optional but recommended
+extension to the AAO loop.
+
+AAO addressed action safety, audit trails, risk classification, and session
+discipline. It did not address cross-session knowledge accumulation. Without a
+persistent knowledge layer, every session re-derives the same understanding from
+raw files. Decisions made in session 3 are unknown in session 20. Contradictions
+between modules are re-discovered instead of already flagged. The Analyze phase
+wastes context reading cold files instead of distilled knowledge.
+
+Section 22 closes that gap.
+
+---
+
+### What Was Added
+
+**SPECIFICATION.md — Section 22: PERSISTENT KNOWLEDGE LAYER**
+
+Eleven subsections defining the complete integration:
+
+- **22.1 Purpose** — The cold-start problem, why plain AAO accumulates nothing,
+  what the wiki layer changes.
+
+- **22.2 Three-Layer Architecture** — Immutable `raw/` (human), AI-maintained
+  `wiki/` (entities, concepts, sources, syntheses, questions), shared `schema/`.
+
+- **22.3 Integration with AAO Phases** — Analyze reads `wiki/index.md` + recent
+  log before every task. Act checks decision pages and updates wiki in the same
+  pass. Observe appends to `wiki/log.md`, runs mini-lint, files syntheses.
+
+- **22.4 Log Entry Format** — Structured format for `wiki/log.md`. Types: ingest,
+  query, lint, edit, decision.
+
+- **22.5 Standing Scope Authorization (C1 + C2 conflict resolutions)** — The
+  Zero-Inference Rule and per-task File Scope Permissions prohibit touching files
+  not in the Phase 1 list. Wiki maintenance is irreconcilable with these rules at
+  face value: a single ingest touches 10–15 pages, and `wiki/log.md` must be
+  appended after every task. Resolution: `wiki/` is permanently in scope when a
+  wiki layer is active. `wiki/log.md` append and mini-lint are standing authorized
+  operations exempt from per-task Phase 1 listing. `raw/` remains outside standing
+  scope.
+
+- **22.6 Lint Operations** — Six checks: orphan pages, stale claims, contradictions,
+  missing concept stubs, broken cross-references, index drift. Contradictions are
+  never silently resolved — always filed to `wiki/questions/` for human review.
+
+- **22.7 Relationship to MEMORY.md and SESSION_LOG.md (C4 conflict resolution)** —
+  MEMORY.md is the executive index (1-line entries, fast session-start read).
+  SESSION_LOG.md is the session governance record. `wiki/log.md` is the task-level
+  operation timeline. `wiki/entities/` is the detailed knowledge layer. All four
+  are complementary. MEMORY.md SHOULD reference wiki entity pages for detail.
+
+- **22.8 No-Planning Rule (C3 conflict resolution)** — Analyze phase wiki reads
+  are internal None-risk reads, not operator-facing planning output. Reading
+  `wiki/index.md` before a task is not planning.
+
+- **22.9 Compounding Knowledge Rule** — Non-obvious findings must be written into
+  the wiki immediately. Syntheses from three or more sources must be filed to
+  `wiki/syntheses/`. Unanswered questions must be filed to `wiki/questions/`.
+  Nothing valuable should exist only in chat history.
+
+- **22.10 Compliance Classification** — LLM-Wiki is a Level 3 optional extension.
+  Not required for Level 1 or Level 2 compliance. Six requirements for projects
+  claiming LLM-Wiki Enhanced AAO compliance.
+
+- **22.11 Reference** — Karpathy gist URL, rationale document path, integration
+  authorship.
+
+**CLAUDE.md template — LLM-Wiki extension section**
+
+Optional section added between the AAO Compliance Checklist and Project-Specific
+Rules. Contains: directory structure reference, standing scope authorization rules,
+Analyze/Act/Observe phase guidance, ingest workflow, compounding knowledge rule,
+and MEMORY.md relationship table. Marked optional — skip if project has no wiki layer.
+
+AAO Compliance Checklist updated with one new item:
+`If LLM-Wiki layer is active: wiki/log.md appended and mini-lint run after every task`
+
+**research/llm-wiki-integration.md — New**
+
+Rationale document explaining why the pattern is critical to AAO. Covers: the
+cold-start problem, per-phase capability improvements, the compounding advantage,
+why maintenance is no longer the bottleneck, all four conflict resolutions, and a
+summary capability comparison table (plain AAO vs. AAO + LLM-Wiki).
+
+---
+
+### Four Rule Conflicts Identified and Resolved
+
+| # | Conflict | Resolution |
+|---|----------|------------|
+| C1 | Zero-Inference Rule prohibits touching files not in Phase 1 list; ingest touches 10–15 wiki pages | Standing scope authorization — `wiki/` permanently in scope when wiki layer active (§22.5) |
+| C2 | File Scope Permissions are per-task; `wiki/log.md` must append after every task | `wiki/log.md` append + mini-lint are standing authorized, exempt from per-task scope (§22.5) |
+| C3 | No-Planning Rule prohibits producing plans; Analyze reads wiki before every task | Wiki pre-reads are internal None-risk reads, not operator-facing output — no real conflict (§22.8) |
+| C4 | MEMORY.md + SESSION_LOG.md overlap with wiki/ artifacts | Documented as complementary layers serving different scopes — MEMORY.md is executive index, wiki/ is detailed layer (§22.7) |
+
+---
+
+### Auditability Impact
+
+No existing auditability mechanism was removed or weakened. Sections 1–21 are
+unchanged. The wiki layer adds task-level traceability that SESSION_LOG.md does
+not provide: named decision pages with citations, discoverable contradiction files,
+and structured synthesis records.
+
+One honest caution noted in the spec: wiki pages are AI-synthesised interpretations,
+not factual records of actions taken. The lint pass catches stale claims, but the
+human remains the final reviewer of wiki accuracy — as they are the final reviewer
+of generated code.
+
+---
+
+### Source
+
+Karpathy, Andrej. "LLM Wiki." GitHub Gist, April 2026.
+https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
