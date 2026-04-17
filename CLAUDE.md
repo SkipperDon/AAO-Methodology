@@ -789,6 +789,114 @@ If any answer triggers a halt: output the specific concern and wait. Do not reso
 * Feature docs version-bumped if affected by this session (or skip stated)
 * Confidence Score stated before every non-trivial action (GREEN/YELLOW/AMBER/RED)
 * Clarification Gate checked — no ambiguous requirements proceeded without resolution
+* If LLM-Wiki layer is active: wiki/log.md appended and mini-lint run after every task
+
+---
+
+## LLM-WIKI LAYER (Optional Extension — Karpathy Pattern)
+
+> **Activation:** This section applies only when the project has an active LLM-Wiki layer
+> (`wiki/` directory exists and is documented in Project-Specific Rules below).
+> Skip if the project does not use a wiki layer.
+> Full normative spec: `SPECIFICATION.md` Section 22.
+
+### Wiki Directory Structure
+
+```
+raw/          ← Immutable. Human adds sources here. AI never modifies.
+  assets/     ← Images and attachments
+wiki/         ← AI-owned. Create, update, cross-reference, lint.
+  index.md    ← Content catalogue: every page, one-line summary, category
+  log.md      ← Append-only timeline of all operations
+  entities/   ← One page per named thing (module, system, decision, person)
+  concepts/   ← One page per idea (pattern, algorithm, policy, principle)
+  sources/    ← One summary page per raw document
+  syntheses/  ← Cross-cutting analyses and comparisons
+  questions/  ← Flagged contradictions and open questions for human review
+schema/
+  CLAUDE.md   ← This file (or your project CLAUDE.md)
+```
+
+### Standing Scope Authorization
+
+When a wiki layer is active, the following operations are **permanently in scope**
+and do NOT require Phase 1 listing on each task:
+
+* Creating or updating any file under `wiki/` as a direct result of an authorized task
+* Appending to `wiki/log.md` after any task
+* Running a mini-lint pass (orphans, stale claims, contradictions, broken links, index drift)
+* Creating `wiki/questions/contradiction-<slug>.md` when contradictions are detected
+* Updating `wiki/index.md` to reflect new or changed pages
+
+`raw/` is **NOT** covered by standing authorization — adding sources to `raw/` requires explicit operator instruction.
+
+This resolves the conflict between the Zero-Inference Rule / File Scope Permissions and wiki maintenance requirements (SPECIFICATION.md §22.5).
+
+### Analyze Phase — Before Every Task
+
+Before touching any file for any authorized task:
+
+1. Read `wiki/index.md` — find relevant entities, concepts, and prior decisions.
+2. `grep "^## \[" wiki/log.md | tail -5` — read the five most recent operations.
+3. Read matching entity/concept pages for the area being changed.
+
+These are Risk Level **None** reads. No Phase 1 listing or pre-statement required.
+They are internal reads, not operator-facing planning output — this does not violate the No-Planning Rule.
+
+### Act Phase — During Task
+
+1. Check for a `wiki/entities/` or `wiki/concepts/` page for the area being changed.
+2. If a prior decision page exists, respect it or flag a contradiction explicitly.
+3. Update wiki pages in the same pass as the task — not deferred to later.
+
+### Observe Phase — After Every Task
+
+1. Append to `wiki/log.md`:
+   ```
+   ## [YYYY-MM-DD] <type> | <short title>
+   - Files changed: ...
+   - Wiki pages updated: ...
+   - Contradictions flagged: ...
+   - Open questions: ...
+   ```
+   Valid types: `ingest`, `query`, `lint`, `edit`, `decision`.
+
+2. Run mini-lint: check for orphans, stale claims, contradictions, missing concept stubs,
+   broken links, index drift.
+
+3. File any valuable synthesis to `wiki/syntheses/<slug>.md`.
+
+4. Create `wiki/questions/contradiction-<slug>.md` for any contradiction — never resolve silently.
+
+### Ingest Workflow — New Source Added to raw/
+
+1. Read the source fully.
+2. Create or update `wiki/sources/<slug>.md` with a structured summary.
+3. Identify every entity and concept mentioned — update or create their wiki pages with backlinks.
+4. Update `wiki/index.md`.
+5. Append ingest entry to `wiki/log.md`.
+6. Run mini-lint.
+
+A single ingest typically touches **10–15 wiki pages** — expected and covered by standing scope authorization.
+
+### Compounding Knowledge Rule
+
+When you discover something non-obvious during a task — write it into the wiki immediately.
+If answering a question required synthesising three or more sources, file it to `wiki/syntheses/`.
+If a question went unanswered, file it to `wiki/questions/`.
+Nothing valuable should exist only in chat history.
+
+### Relationship to MEMORY.md and SESSION_LOG.md
+
+| Artifact | Purpose | Owner |
+|----------|---------|-------|
+| MEMORY.md | High-level stable facts index, 1-line entries, fast session-start read | AI (session-close) |
+| SESSION_LOG.md | Session governance record — what was done, decisions, costs | AI (session-close) |
+| `wiki/log.md` | Task-level operation timeline — ingests, queries, lint passes | AI (Observe phase) |
+| `wiki/entities/` | Detailed accumulated knowledge with full cross-references | AI (Act + Observe) |
+
+When a wiki layer is active, MEMORY.md entries SHOULD reference `wiki/entities/` for detail.
+Example: `"auth module — see wiki/entities/auth-module.md for full architecture context."`
 
 ---
 

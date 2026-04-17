@@ -1664,8 +1664,193 @@ wait for operator acknowledgment before proceeding to the next task.
 
 ---
 
-*AAO Specification v1.6 | © 2026 Donald Moskaluk | AtMyBoat.com*
+---
+
+## 22. PERSISTENT KNOWLEDGE LAYER — LLM-Wiki Integration
+
+### 22.1 Purpose
+
+**22.1.1** AAO addresses action safety, audit trails, and session discipline. It does not address cross-session knowledge accumulation. Without an explicit knowledge layer, every session re-derives the same understanding from raw files — decisions made in session 3 are unknown in session 20, contradictions between modules are re-discovered instead of already flagged, and the Analyze phase wastes context reading cold files instead of distilled knowledge.
+
+**22.1.2** The LLM-Wiki pattern (Karpathy, April 2026) closes this gap by introducing a persistent, agent-maintained wiki that accumulates knowledge across sessions. This section defines how the pattern integrates with AAO and resolves the rule conflicts it creates.
+
+**22.1.3** The LLM-Wiki layer is an **optional extension** to AAO. Systems without a persistent knowledge requirement MAY omit it. Systems operating over multi-week or multi-month projects SHOULD adopt it.
+
+---
+
+### 22.2 Three-Layer Architecture
+
+**22.2.1** An LLM-Wiki layer consists of three directories with strictly defined ownership:
+
+| Layer | Directory | Owner | Rule |
+|-------|-----------|-------|------|
+| Raw sources | `raw/` | Human | Add only. Never delete. Never edit. |
+| Wiki | `wiki/` | AI | Create, update, cross-reference, lint. |
+| Schema | `schema/` | Both | Co-evolve as workflow matures. |
+
+**22.2.2** `raw/` is immutable at runtime. The AI system MUST NOT modify any file in `raw/`.
+
+**22.2.3** `wiki/` MUST contain at minimum:
+- `wiki/index.md` — catalogue of all wiki pages, one-line summary per page
+- `wiki/log.md` — append-only operation timeline
+- `wiki/entities/` — one page per named entity (module, system, decision, person)
+- `wiki/concepts/` — one page per idea (pattern, algorithm, policy, principle)
+- `wiki/sources/` — one summary page per raw document
+- `wiki/syntheses/` — cross-cutting analyses and comparisons
+- `wiki/questions/` — open questions and contradiction flags for human review
+
+**22.2.4** `wiki/` MUST be placed within the project repository and committed with the same session discipline as any other project file.
+
+---
+
+### 22.3 Integration with AAO Phases
+
+**22.3.1 Analyze phase**
+
+Before any implementation begins, the AI MUST:
+1. Read `wiki/index.md` for relevant entities, concepts, and prior decisions.
+2. Run `grep "^## \[" wiki/log.md | tail -5` to read the five most recent operations.
+3. Read relevant entity and concept pages for the area being changed.
+
+These reads are Risk Level **None** and do not require Phase 1 listing or operator confirmation. They are internal pre-task reads, not operator-facing planning output.
+
+**22.3.2 Act phase**
+
+During implementation, the AI MUST:
+1. Check for a matching `wiki/entities/` or `wiki/concepts/` page before writing code.
+2. If a prior decision page exists, respect it or explicitly flag a contradiction.
+3. Update wiki pages as part of the same task — not as a deferred follow-up.
+
+Wiki page creation and update during Act are covered by the standing scope authorization defined in §22.5.
+
+**22.3.3 Observe phase**
+
+After every task, the AI MUST:
+1. Append a structured entry to `wiki/log.md` (see §22.4).
+2. Run a mini-lint pass (see §22.6).
+3. File any valuable synthesis to `wiki/syntheses/<slug>.md`.
+4. Create `wiki/questions/contradiction-<slug>.md` for any contradiction found — never resolve silently.
+
+`wiki/log.md` append and mini-lint are standing authorized operations under §22.5.
+
+---
+
+### 22.4 Log Entry Format
+
+Every operation appended to `wiki/log.md` MUST follow this format:
+
+```
+## [YYYY-MM-DD] <type> | <short title>
+- Files changed: ...
+- Wiki pages updated: ...
+- Contradictions flagged: ...
+- Open questions: ...
+```
+
+Valid types: `ingest`, `query`, `lint`, `edit`, `decision`.
+
+---
+
+### 22.5 Standing Scope Authorization — Conflict Resolutions C1 and C2
+
+**22.5.1** The Zero-Inference Rule and File Scope Permissions rule in the AAO CLAUDE.md template prohibit touching files not explicitly listed in Phase 1 of the Pre-Implementation Gate.
+
+**22.5.2** These rules create an irreconcilable conflict with wiki maintenance: a single ingest operation touches 10–15 wiki pages, and `wiki/log.md` must be appended after every task regardless of what Phase 1 authorized.
+
+**22.5.3** Resolution — when an LLM-Wiki layer is active in a project, the following operations are **standing authorized** and exempt from per-task Phase 1 listing:
+
+- Creating or updating any file under `wiki/` as a direct result of an authorized task
+- Appending to `wiki/log.md` after any task
+- Running a mini-lint pass after any task
+- Creating `wiki/questions/contradiction-<slug>.md` pages when contradictions are detected
+- Updating `wiki/index.md` to reflect new or changed pages
+
+**22.5.4** The `raw/` directory is NOT covered by standing authorization. Adding files to `raw/` requires explicit operator instruction.
+
+**22.5.5** Projects adopting the LLM-Wiki layer MUST document this standing authorization explicitly in their project CLAUDE.md under a section titled `## LLM-Wiki Knowledge Layer`.
+
+---
+
+### 22.6 Lint Operations
+
+The AI MUST check for the following during every mini-lint pass:
+
+- **Orphan pages** — wiki pages with zero inbound links → add links or delete
+- **Stale claims** — assertions superseded by a newer source → update
+- **Contradictions** — two sources asserting conflicting facts → create `wiki/questions/contradiction-<slug>.md`, flag for human review, never resolve silently
+- **Missing concept pages** — concepts referenced three or more times without a dedicated page → create a stub
+- **Broken cross-references** — `[[links]]` pointing to non-existent pages → fix
+- **Index drift** — pages that exist but are absent from `wiki/index.md` → add them
+
+---
+
+### 22.7 Relationship to Existing AAO Memory Artifacts
+
+**22.7.1** AAO already defines two memory artifacts: MEMORY.md (stable facts index) and SESSION_LOG.md (session governance record). The wiki layer is complementary, not a replacement.
+
+| Artifact | Purpose | Scope | Owner |
+|----------|---------|-------|-------|
+| MEMORY.md | High-level stable facts, 1-line entries, fast session-start read | Cross-project | AI (session-close) |
+| SESSION_LOG.md | Session governance: what was done, by whom, decisions, costs | Per-session | AI (session-close) |
+| `wiki/log.md` | Task-level operation timeline: ingests, queries, lint passes | Per-task | AI (Observe phase) |
+| `wiki/entities/` | Detailed accumulated knowledge with cross-references | Per-entity | AI (Act + Observe) |
+
+**22.7.2** MEMORY.md is the executive index. When a wiki layer is active, MEMORY.md entries SHOULD point into `wiki/entities/` for detailed context. Example: a MEMORY.md entry may read "auth module — see wiki/entities/auth-module.md for full architecture context."
+
+**22.7.3** SESSION_LOG.md records what happened at the session level. `wiki/log.md` records what happened at the task level. Both are append-only. Neither replaces the other.
+
+---
+
+### 22.8 No-Planning Rule — Conflict Resolution C3
+
+**22.8.1** The No-Planning Rule prohibits Claude Code from producing multi-step implementation plans, architecture proposals, or directory structure proposals without explicit operator authorization.
+
+**22.8.2** The Analyze phase wiki reads are internal pre-task reads — not operator-facing planning output. Reading `wiki/index.md` before a task does not constitute planning. This is a Risk Level None operation that requires no pre-statement and produces no operator-visible output.
+
+**22.8.3** Presenting a synthesis from `wiki/` to the operator in response to a question is a query operation, not planning. Filing a synthesis answer to `wiki/syntheses/` is a standing authorized wiki maintenance operation.
+
+---
+
+### 22.9 Compounding Knowledge Rule
+
+**22.9.1** The principal value of the LLM-Wiki layer is that each session deposits knowledge. The *n*-th session operates against *n-1* sessions of accumulated, maintained, cross-referenced knowledge rather than cold files.
+
+**22.9.2** When the AI discovers something non-obvious during a task — a surprising constraint, a pattern that appears in multiple places, a resolved ambiguity — it MUST write it into the wiki immediately. Do not assume it will be obvious in a future session.
+
+**22.9.3** If answering a question required synthesising three or more sources, that synthesis MUST be filed to `wiki/syntheses/<slug>.md`. Good answers MUST NOT exist only in chat history.
+
+**22.9.4** Open questions that could not be answered from available sources MUST be filed to `wiki/questions/<slug>.md` — not silently dropped.
+
+---
+
+### 22.10 Compliance Classification
+
+**22.10.1** The LLM-Wiki layer is a **Level 3 optional extension** to AAO. It is not required for Level 1 or Level 2 compliance.
+
+**22.10.2** Projects claiming **LLM-Wiki Enhanced AAO** compliance MUST satisfy all of the following:
+- `raw/` is immutable — AI never modifies it
+- `wiki/` is committed and maintained per §22.2 through §22.6
+- Standing scope authorization is documented in the project CLAUDE.md per §22.5.5
+- Analyze phase reads `wiki/index.md` + recent log entries before every task
+- Observe phase appends to `wiki/log.md` after every task
+- Contradictions are never resolved silently — always filed to `wiki/questions/` and flagged to the operator
+
+---
+
+### 22.11 Reference
+
+*Source: Andrej Karpathy, "LLM Wiki" gist, April 2026*
+*https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f*
+
+*Rationale document: `research/llm-wiki-integration.md` in this repository*
+
+*Integration authored by Donald Moskaluk, AtMyBoat.com, 2026-04-17*
+
+---
+
+*AAO Specification v1.7 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v1.7 adds Section 22: Persistent Knowledge Layer — LLM-Wiki Integration*
 *v1.6 adds Section 21: Execute First, Suggest Second*
 *v1.5 adds Section 20: Anti-Sycophancy Protocol and OIC sixth metric*
 *v1.4 adds Section 19: Session Quality Metrics*
