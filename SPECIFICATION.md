@@ -1,6 +1,6 @@
 # AAO Specification
 ## Autonomous Action Operating Methodology — Complete Specification
-### Version 1.6 | © 2026 Donald Moskaluk | AtMyBoat.com
+### Version 1.8 | © 2026 Donald Moskaluk | AtMyBoat.com
 
 
 > **⚠️ DISCLAIMER — Framework Under Development**
@@ -1399,6 +1399,99 @@ that AI-assisted development promises.
 - **NIST MEASURE 2.6** — Evaluations of AI system trustworthiness are documented
 - **NIST MANAGE 4.1** — Post-deployment AI risks and benefits are evaluated
 - **NIST GOVERN 1.3** — Risk tolerance defined and monitored for AI deployment
+
+---
+
+### 19.8 Extended Data Collection Fields for Research Datasets
+
+**19.8.1 Purpose**
+
+The five core SQS metrics (Sections 19.2) provide operational governance
+measurement at zero marginal cost. Teams conducting longitudinal research —
+or seeking to test the governance multiplier hypotheses H1–H5 (Moskaluk,
+2026) — SHOULD capture the following additional fields at session close.
+These fields are not required for AAO Core, Standard, or Advanced compliance.
+They are required for any team claiming to generate a research-quality SQS
+panel dataset.
+
+**19.8.2 Extended Fields**
+
+The following fields SHOULD be appended to the SESSION_LOG.md quality metrics
+block when research-grade data collection is active:
+
+```
+EXTENDED DATA FIELDS — [session date]
+─────────────────────────────────────────────────────
+session_duration_min   : [integer minutes, start to close]
+tasks_planned          : [count of tasks in sprint scope at session start]
+tasks_completed        : [count of planned tasks completed this session]
+governing_doc_version  : [version string of primary governing document, e.g. CLAUDE.md v2.3]
+attributed_rec         : [count of REC events this session whose root cause
+                          traces to work performed in the immediately prior session]
+failure_category       : [primary failure type — see controlled vocabulary below]
+human_verified         : [0 = operator-calculated from log; 1 = independently verified
+                          by a second reviewer against raw session log]
+─────────────────────────────────────────────────────
+```
+
+**19.8.3 Failure Category Controlled Vocabulary**
+
+The `failure_category` field MUST use one of the following codes. If a session
+has no failures (SQS = 90+, all metrics at threshold), record `none`. If
+multiple failure types are present, record the primary failure (the one that
+most significantly depressed the SQS).
+
+| Code | Description |
+|------|-------------|
+| `none` | No failures — all metrics at or above threshold |
+| `pre_action_informal` | SGCR failure: stop gates executed without formal pre-action statement |
+| `scope_expansion` | SCR failure: work performed outside stated sprint scope |
+| `documentation_not_read` | Governing documents not read before execution phase |
+| `unauthorized_action` | UAC: file or system modification outside authorized scope |
+| `implementation_error` | Technical error in generated code requiring REC correction |
+| `deployment_error` | REC caused by incorrect deployment target, path, or command |
+| `resource_exhaustion` | Session degraded due to platform resource limits (OOM, context overflow) |
+| `specification_misread` | Initial misinterpretation of task specification, corrected during session |
+| `wrong_deployment_target` | REC caused by deploying to wrong environment or endpoint |
+| `context_loss` | Session continuity broken by context-window overflow mid-task |
+
+**19.8.4 Session Disposition Tracking**
+
+Teams generating research datasets SHOULD maintain a companion
+`session_exclusion_log.csv` tracking every session log entry that did not
+produce a complete SQS record. Minimum fields:
+
+| Field | Description |
+|-------|-------------|
+| `session_id` | Session identifier |
+| `date_approx` | Approximate date |
+| `exclusion_reason_code` | One of: `context_overflow_no_close`, `sub_session`, `missing_metrics`, `missing_session_close`, `requires_log_verification` |
+| `notes` | Free text explanation |
+
+This file allows readers of the research dataset to assess whether the
+exclusion pattern is random or systematically biased toward worse-governed
+sessions — a selection bias concern in any incomplete-panel SQS study.
+
+**19.8.5 Minimum Dataset Requirements for Research Claims**
+
+A research claim based on SQS panel data MUST satisfy:
+
+| Claim type | Minimum requirement |
+|------------|---------------------|
+| Instrument operability demonstration | n ≥ 20 sessions, single organization, complete SQS at session close |
+| Instrument validation (construct validity) | n ≥ 36 sessions, SGCR Spearman correlation reported, circularity analysis if MLS group comparison included |
+| Governance-productivity causal claim (H1) | n ≥ 50 sessions, `tasks_planned`/`tasks_completed` outcome data, `attributed_rec` for lagged H3 test |
+| Cross-organization generalization | n ≥ 50 sessions, ≥ 3 independent organizations, `governing_doc_version` tracked |
+| Governance multiplier calibration (H5) | n ≥ 100 sessions, ≥ 3 organizations, independent productivity outcome measure |
+
+**19.8.6 Operator Calculation Requirement**
+
+SQS scores in any research dataset MUST be calculated by the operator from
+contemporaneous SESSION_LOG.md records — not self-reported by the AI system.
+The AI system generates the activity record. The operator applies the formula.
+
+Research datasets reporting SQS scores MUST state in the data availability
+section who calculated the scores and from what source records.
 
 ---
 

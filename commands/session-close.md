@@ -65,6 +65,42 @@ If this is the 5th or later session, also calculate and present:
 - Which metric has the lowest average (primary improvement target)
 - Whether trend is improving, stable, or declining
 
+**Step 1C — Extended Research Data Fields (AAO Section 19.8 — record if active)**
+
+If this project is generating a research-quality SQS dataset, append the
+following block to the SESSION_LOG.md quality metrics entry:
+
+```
+EXTENDED DATA FIELDS — [session date]
+─────────────────────────────────────────────────────
+session_duration_min   : [integer minutes from session start to close]
+tasks_planned          : [count of tasks in sprint scope at session start]
+tasks_completed        : [count of planned tasks completed this session]
+governing_doc_version  : [version string of primary governing document, e.g. CLAUDE.md v2.3]
+attributed_rec         : [count of REC events whose root cause traces to the prior session's work; 0 if none or unknown]
+failure_category       : [primary failure code — see controlled vocabulary below; "none" if SQS ≥ 90 and all metrics at threshold]
+human_verified         : [0 = operator-calculated from log; 1 = independently verified by second reviewer]
+─────────────────────────────────────────────────────
+```
+
+**failure_category codes (use one):**
+- `none` — no failures
+- `pre_action_informal` — stop gates without formal pre-action statement
+- `scope_expansion` — work outside stated sprint scope
+- `documentation_not_read` — governing docs not read before execution
+- `unauthorized_action` — UAC: modification outside authorized scope
+- `implementation_error` — technical error requiring REC correction
+- `deployment_error` — wrong deployment target, path, or command
+- `resource_exhaustion` — OOM or context overflow degraded session
+- `specification_misread` — task misread, corrected during session
+- `wrong_deployment_target` — deployed to wrong environment
+- `context_loss` — context-window overflow broke session continuity
+
+If multiple failures apply, record the one that most depressed the SQS.
+
+Skip Step 1C entirely if this project is not generating a research dataset.
+State "Step 1C: not applicable — research data collection inactive" in the log.
+
 2. List every file changed this session
 3. Produce Release Package Manifest if any Pi deploy occurred
 4. Write SESSION_LOG.md entry — complete, not summarised

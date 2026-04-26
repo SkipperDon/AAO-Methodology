@@ -265,11 +265,25 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 
 ## Status
 
-**Current version:** 1.0
+**Current version:** 1.8
 **Live site:** https://skipperdon.github.io/AAO-Methodology/
 **Reference implementation:** d3kOS v2.x
 **License:** Apache 2.0
 **Publication:** Live
+
+### Version History
+
+| Version | Date | Key Addition |
+|---------|------|-------------|
+| 1.8 | 2026-04-26 | Section 19.8 — Extended Data Collection Fields for Research Datasets. Adds `session_duration_min`, `tasks_planned`, `tasks_completed`, `governing_doc_version`, `attributed_rec`, `failure_category`, `human_verified` to session-close workflow. Enables H1–H5 hypothesis testing from SQS panel data. |
+| 1.7 | 2026-04-17 | Section 22 — Persistent Knowledge Layer (LLM-Wiki Integration). Four conflict resolutions. |
+| 1.6 | 2026-03-19 | Section 21 — Execute First, Suggest Second. Post-execution verification. |
+| 1.5 | 2026-03-20 | Section 20 — Anti-Sycophancy Protocol. OIC added as Session 19 Metric 6. |
+| 1.4 | 2026-03-19 | Section 19 — Session Quality Metrics. SQS formula, five metrics, PDCA integration. |
+| 1.3 | 2026-03-19 | Section 18 — Backup Naming Standard. Session memory loop complete. |
+| 1.2 | 2026-03-19 | Section 17 — Interactive Development Mode. Git as snapshot layer. |
+| 1.1 | 2026-03-19 | Sections 12–16 — Human Sign-Off, Diversity, Decommissioning, Stakeholder Engagement. |
+| 1.0 | 2026-03-01 | Initial release — Sections 1–11, four-layer architecture. |
 
 ---
 
