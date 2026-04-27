@@ -1,9 +1,10 @@
 # AAO Data Collection System — Architecture Document
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** 2026-04-27  
 **Author:** Donald Moskaluk — AtMyBoat.com | AAO Project  
 **Status:** PLAN — approved for Phase 1 build  
+**Changes v1.1:** Q3 resolved — zero-config via CLAUDE.md snippet (no separate config file, no project_type). Q4 resolved — collector in aao-methodology-repo, PHP files in Helm-OS/deployment/research/.  
 
 ---
 
@@ -19,7 +20,7 @@ The system supports the research paper *Governing the AI Productivity Promise* (
 
 | Principle | Implementation |
 |-----------|---------------|
-| Zero friction for contributors | Single Python file, stdlib only — no pip installs, no setup |
+| Zero friction for contributors | Single Python file, stdlib only — no pip installs, no config file. API key delivered as a one-line snippet pasted into the contributor's existing CLAUDE.md. |
 | Privacy by design | Metrics only leave the machine — no code, prompts, or project names |
 | Review before send | Contributors see a preview and confirm before every submission |
 | Open public participation | Anyone can register and contribute |
@@ -35,17 +36,16 @@ The system supports the research paper *Governing the AI Productivity Promise* (
 ┌──────────────────────────────────────────────────────────────────┐
 │  CONTRIBUTOR MACHINE  (Windows / Mac / Linux)                    │
 │                                                                  │
-│  CLAUDE.md  ──► "contribute at atmyboat.com/research/"          │
+│  CLAUDE.md  ──► registration link + aao_api_key: aao_...       │
+│      │               (API key lives here — no separate config)   │
 │      │                                                           │
-│  aao-collector.py                                                │
+│  aao-collector.py  (reads API key from CLAUDE.md automatically) │
 │      │                                                           │
 │      ├── reads SESSION_LOG.md                                    │
 │      ├── parses session blocks (last session OR all --backfill)  │
 │      ├── strips project data → metrics only                      │
 │      ├── shows preview table → contributor types Y to confirm    │
 │      └── HTTPS POST ─────────────────────────────────────────►  │
-│                                                                  │
-│  aao-collector.cfg  (API key + endpoint + project_type)         │
 └──────────────────────────────────────────────────────────────────┘
                                       │
                             TLS 1.2+ / HTTPS
@@ -74,7 +74,7 @@ The system supports the research paper *Governing the AI Productivity Promise* (
 ### 4.1 Local Collector — `aao-collector.py`
 
 **Language:** Python 3.6+  
-**Dependencies:** stdlib only (`urllib.request`, `json`, `hashlib`, `pathlib`, `datetime`, `configparser`, `argparse`)  
+**Dependencies:** stdlib only (`urllib.request`, `json`, `hashlib`, `pathlib`, `datetime`, `re`, `argparse`)  
 **Platform:** Windows, Mac, Linux — no installation required beyond Python itself  
 **Distribution:** Direct download from `https://atmyboat.com/research/`  
 
@@ -89,7 +89,8 @@ The system supports the research paper *Governing the AI Productivity Promise* (
 **Processing sequence:**
 
 ```
-1. Read aao-collector.cfg → load API key, endpoint URL, project_type
+1. Scan for CLAUDE.md in current dir and up to 3 parent dirs → extract aao_api_key: value
+   If not found: print registration URL and exit with instructions
 2. Locate SESSION_LOG.md (current dir, or --log path override)
 3. Parse session block(s) → extract metrics
 4. Strip all non-metric content (project names, file names, notes)
@@ -100,15 +101,14 @@ The system supports the research paper *Governing the AI Productivity Promise* (
 9. Append result to local aao-collector.log
 ```
 
-**Config file `aao-collector.cfg`:**
+**No config file.** The API key is a single line in the contributor's `CLAUDE.md`:
 
-```ini
-[collector]
-api_key      = YOUR_API_KEY_HERE
-endpoint     = https://atmyboat.com/research/aao-submit.php
-project_type = web-app
-log_path     = SESSION_LOG.md
+```markdown
+## AAO Research Contribution
+aao_api_key: aao_a3f7c2b1...
 ```
+
+The collector finds this line automatically. No separate file to create or maintain.
 
 **Preview table format (shown before every submission):**
 
@@ -124,7 +124,6 @@ log_path     = SESSION_LOG.md
  REC         : 0
  MLS         : 1
  UAC         : 0
- Project type: marine-dashboard
  AAO version : 1.8
 ─────────────────────────────────────────────────
  No project names, file names, or code are sent.
@@ -137,21 +136,27 @@ log_path     = SESSION_LOG.md
 
 The AAO CLAUDE.md template (distributed via `github.com/SkipperDon/aao-methodology`) includes a **Data Contribution** section. Contributors who adopt AAO receive this section automatically — no separate announcement required.
 
-**Section added to CLAUDE.md template:**
+**Section added to CLAUDE.md template (static — no API key yet):**
 
 ```markdown
 ## AAO Research Data Contribution (optional)
 
-To contribute your session metrics to the AAO research dataset:
-
-1. Register at https://atmyboat.com/research/ — takes 2 minutes
-2. Download aao-collector.py from that page
-3. Add your API key to aao-collector.cfg (one line)
-4. Run `python aao-collector.py` after closing any session
-
+Contribute your session metrics to the AAO research dataset.
+Register at https://atmyboat.com/research/ — you will receive a snippet
+to paste below. Download aao-collector.py from the same page.
+Run `python aao-collector.py` after any session to submit.
 No code, prompts, or project names are transmitted — metrics only.
-Full privacy policy at https://atmyboat.com/research/privacy
 ```
+
+**After registration — contributor pastes their personal snippet below the above:**
+
+```markdown
+## AAO Research Contribution
+aao_api_key: aao_a3f7c2b1...
+```
+
+The collector scans CLAUDE.md for the `aao_api_key:` line automatically.
+No separate config file is ever created.
 
 **Session-close command integration (`commands/session-close.md`):**
 
@@ -177,16 +182,22 @@ This ensures contributors are prompted at the natural moment — right after ses
 | Field | Required | Notes |
 |-------|----------|-------|
 | Email address | Yes | Used for key delivery only |
-| Organization / project type | No | Helps classify submissions |
+| Organization | No | Optional — helps understand contributor diversity |
 | AAO version in use | No | Pre-filled "1.8" |
 | Data use agreement checkbox | Yes | "I confirm this data is anonymized and consent to research use" |
 
 **On submit:**
-1. Generate API key: 32-char random hex
-2. Store hashed API key + hashed email in `aaa_contributors`
+1. Generate API key: 32-char random hex with `aao_` prefix
+2. Store hashed API key + hashed email in `aao_contributors`
 3. Record SHA-256 of registration IP in `ip_hash`
-4. Send email from `admin@atmyboat.com` with API key + download link
+4. Send email from `admin@atmyboat.com` with: API key, CLAUDE.md snippet to paste, download link for aao-collector.py
 5. Redirect to confirmation page with download link
+
+**Registration email includes this ready-to-paste CLAUDE.md snippet:**
+```
+## AAO Research Contribution
+aao_api_key: aao_<your-key-here>
+```
 
 **API key format:** `aao_` + 32 hex chars (e.g., `aao_a3f7c2b1...`)  
 The `aao_` prefix makes keys recognizable without being guessable.
@@ -230,7 +241,6 @@ The `aao_` prefix makes keys recognizable without being guessable.
 | rec | No | Integer ≥ 0 |
 | mls | No | 0 or 1 |
 | uac | No | Integer ≥ 0 |
-| project_type | No | String, max 50 chars |
 | aao_version | No | String, max 10 chars |
 | agent_version | No | String, max 10 chars |
 | notes | No | String, max 200 chars — collector warns "no project names" |
@@ -292,7 +302,6 @@ The `aao_` prefix makes keys recognizable without being guessable.
 | Parameter | Example | Effect |
 |-----------|---------|--------|
 | `aao_version` | `?aao_version=1.8` | Filter to a specific AAO version |
-| `project_type` | `?project_type=web-app` | Filter by project type |
 | `from` | `?from=2026-01-01` | Sessions after this date |
 | `format` | `?format=csv` | Returns CSV instead of JSON |
 
@@ -343,7 +352,6 @@ CREATE TABLE aao_sessions (
   rec               SMALLINT UNSIGNED,
   mls               TINYINT(1),
   uac               SMALLINT UNSIGNED,
-  project_type      VARCHAR(50),
   aao_version       VARCHAR(10),
   agent_version     VARCHAR(10),
   notes             VARCHAR(200),
@@ -357,7 +365,6 @@ CREATE TABLE aao_sessions (
 - `aao_sessions(contributor_token)` — contributor's own session queries
 - `aao_sessions(date)` — trend queries
 - `aao_sessions(aao_version)` — version-filtered aggregates
-- `aao_sessions(project_type)` — type-filtered aggregates
 
 ---
 
@@ -380,7 +387,6 @@ CREATE TABLE aao_sessions (
     "rec":           { "type": "integer", "minimum": 0 },
     "mls":           { "type": "integer", "enum": [0, 1] },
     "uac":           { "type": "integer", "minimum": 0 },
-    "project_type":  { "type": "string",  "maxLength": 50 },
     "aao_version":   { "type": "string",  "maxLength": 10 },
     "agent_version": { "type": "string",  "maxLength": 10 },
     "notes":         { "type": "string",  "maxLength": 200 }
@@ -404,11 +410,12 @@ Step 2 — Register (one time, ~2 minutes)
   Check data use agreement
   Receive API key at admin@atmyboat.com
 
-Step 3 — Configure collector (one time, ~1 minute)
+Step 3 — Configure collector (one time, ~30 seconds)
   Download aao-collector.py from the research page
-  Create aao-collector.cfg in your project root:
-    api_key = aao_<your key>
-    project_type = <your project category>
+  Paste the CLAUDE.md snippet from the registration email into your CLAUDE.md:
+    ## AAO Research Contribution
+    aao_api_key: aao_<your key>
+  No other configuration needed.
 
 Step 4 — Submit sessions (ongoing, ~10 seconds per session)
   At session end, run: python aao-collector.py
@@ -431,7 +438,6 @@ Step 5 — Backfill historical sessions (optional, one time)
 |------|-------------|-------|
 | Session metrics (SQS, SCR, etc.) | Yes | Core dataset |
 | Session date | Yes | Used for trend analysis |
-| Project type | Yes — optional | Contributor-chosen category label only |
 | AAO version | Yes — optional | Used for version-cohort analysis |
 | Notes | Yes — optional | Max 200 chars; collector warns against project names |
 | Source code | **Never** | Not parsed, not sent |
@@ -464,8 +470,7 @@ Step 5 — Backfill historical sessions (optional, one time)
 | `aao-data.php` | `atmyboat.com/research/` | Public aggregate API |
 | `aao-config.php` | `atmyboat.com/research/` | DB credentials (never committed) |
 | `privacy/index.html` | `atmyboat.com/research/privacy/` | Privacy policy |
-| `aao-collector.py` | Served as download | Local collector script |
-| `aao-collector.cfg.example` | Served as download | Config template |
+| `aao-collector.py` | Served as download | Local collector script — no config file needed |
 
 **MySQL tables:** `aao_contributors`, `aao_sessions` (see Section 5)
 
@@ -496,13 +501,23 @@ Add after the "Session End" section:
 ```markdown
 ## AAO Research Data Contribution (optional)
 
-Contribute your session metrics to the AAO research dataset at:
-https://atmyboat.com/research/
-
-Setup: register → get API key → download aao-collector.py → run after sessions.
+Contribute your session metrics to the AAO research dataset.
+Register at https://atmyboat.com/research/ — you will receive a snippet
+to paste below. Download aao-collector.py from the same page.
+Run `python aao-collector.py` after any session to submit.
 No code, prompts, or project names are transmitted — metrics only.
 Backfill all prior sessions with: python aao-collector.py --backfill
+
+<!-- paste your registration snippet below this line -->
 ```
+
+After registering, the contributor adds one line below the comment:
+
+```markdown
+aao_api_key: aao_<their-key>
+```
+
+The collector finds this line automatically — no separate file, no additional setup.
 
 ### `commands/session-close.md` — reminder line
 
@@ -535,13 +550,13 @@ These queries are available via the Admin CRM (can be added as a `/research-stat
 
 ## 12. Open Items Before Build Starts
 
-| # | Item | Owner |
-|---|------|-------|
-| 1 | Confirm HostPapa staging vs live deploy order | Don |
-| 2 | Confirm email deliverability from `admin@atmyboat.com` on HostPapa | Don (test) |
-| 3 | Decide project_type vocabulary (free text vs controlled list) | Don |
-| 4 | Confirm `aao-collector.py` stored in this repo or its own repo | Don |
-| 5 | UpdraftPlus backup before any HostPapa DB changes | Don |
+| # | Item | Status | Owner |
+|---|------|--------|-------|
+| 1 | Confirm HostPapa staging vs live deploy order | OPEN | Don |
+| 2 | Confirm email deliverability from `admin@atmyboat.com` on HostPapa | OPEN | Don (test) |
+| 3 | project_type removed — zero-config via CLAUDE.md snippet | **RESOLVED v1.1** | — |
+| 4 | `aao-collector.py` in `aao-methodology-repo/data-collection/`; PHP files in `Helm-OS/deployment/research/` | **RESOLVED v1.1** | — |
+| 5 | UpdraftPlus backup before any HostPapa DB changes | OPEN | Don |
 
 ---
 
