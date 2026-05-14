@@ -936,13 +936,44 @@ Example:
 
 ---
 
-## COST CONTROL
+## COST CONTROL — AI MODEL CLASSIFICATION GATE
 
-Before writing any code or calling any AI:
+Before any AI invocation, classify the task and route to the correct tier.
+Using a higher tier without stated justification is a scope violation.
 
-1. Can I do it directly? (file edits, config, simple logic) — just do it
-2. Does it need code generation? — use the cheapest capable model
-3. Only escalate to expensive models for: planning, architecture, reviewing output
+**The Three-Tier Model:**
+
+| Tier | Role | Minimum Capability | Tasks |
+|---|---|---|---|
+| Tier 1 | Architect | ≥70B parameters or frontier API equivalent, ≥32K context | System design, constraint analysis, architectural trade-offs, methodology decisions, session planning |
+| Tier 2 | Spec Writer | ≥20B parameters or mid-tier API equivalent, ≥16K context | Atomic module specs, interface contracts, JSON schemas, test requirements, structured decomposition |
+| Tier 3 | Implementer | ≥7B parameters, quantized acceptable, ≥8K context | Code generation, file edits, boilerplate, config changes, test execution, data transforms |
+
+**Before every Tier 3 task — Atomic Spec required (produced by Tier 1 or Tier 2):**
+
+| Element | Content |
+|---|---|
+| Constraint boundaries | What the implementer cannot do (e.g., "no external libraries," "memory < 50MB") |
+| Interface contract | Exact input/output types or JSON schema the output must conform to |
+| Context injection | One file or module only — not the full codebase |
+| Unit test | Test suite must exist before implementation — TDD, structurally enforced |
+
+**Watchdog (Tier 1 or Tier 2) — after every Tier 3 task:**
+- Implementer submits output + Decision Log (why choices were made)
+- Watchdog verifies: contract conformance, constraint compliance, architectural alignment
+- Next module does not begin until Watchdog approves
+
+**State classification before invoking:**
+
+    TASK TYPE: [IMPLEMENT] — Tier 3
+
+or
+
+    TASK TYPE: [ARCHITECT] — Tier 1. Reason: [one sentence justifying escalation].
+
+**Default rule:** When ambiguous, default to Tier 3. Escalate to Tier 2 when decomposition is needed. Escalate to Tier 1 only when the deliverable governs multiple future sessions or requires cross-system reasoning.
+
+**Telemetry:** Record tier in session extended data field `task_classification`. Feeds the governance loop — identifies where tier routing is ambiguous and where gate rules need sharpening.
 
 ---
 
