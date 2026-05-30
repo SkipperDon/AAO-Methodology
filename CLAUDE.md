@@ -975,6 +975,9 @@ or
 
 **Telemetry:** Record tier in session extended data field `task_classification`. Feeds the governance loop — identifies where tier routing is ambiguous and where gate rules need sharpening.
 
+**When Tier 3 encounters unknowns — Question Queue Protocol (§24):**
+Before every new sub-task, Tier 3 checks `wiki/index.md` Questions section. For any unknown touching data shapes, interface contracts, API endpoints, architectural decisions, or security decisions: file a question at `wiki/questions/<YYYY-MM-DD>-<slug>.md`, add a pointer to the index, record the provisional assumption (or state "sub-task skipped"), and move on. Do NOT assume on high-stakes decisions. Invoke Tier 2 (Sonnet-class) when: **3+ open questions accumulate** OR **Tier 3 is blocked on ALL remaining sub-tasks**. Tier 2 answers all open questions in one batch. Every high-stakes answer is promoted to a wiki entity or concept page — not left inline in the question file. Log Tier 2 Q-queue invocations in SESSION_LOG.md. Tier 1 (Opus-class) is invoked only if a question reveals an architectural contradiction or requires a cross-system decision. Full protocol: `SPECIFICATION.md §24`.
+
 ---
 
 *This template is part of the AAO Autonomous Action Operating Methodology.*

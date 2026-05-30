@@ -2150,8 +2150,144 @@ TASK TYPE: [ARCHITECT] — Tier 1. Reason: [one sentence justifying escalation].
 
 ---
 
-*AAO Specification v1.9 | © 2026 Donald Moskaluk | AtMyBoat.com*
+## 24. MULTI-TIER QUESTION QUEUE PROTOCOL
+
+### 24.1 Purpose and Scope
+
+**24.1.1** When a Tier 3 implementer (Haiku-class or equivalent) encounters an unknown during a build session, it faces a binary choice: assume and proceed, risking rework; or block and wait, wasting build time. Neither is optimal at scale.
+
+**24.1.2** This section defines a third path: the Question Queue Protocol. Tier 3 files questions as structured artifacts, continues work on unblocked sub-tasks, and triggers a Tier 2 review when the queue reaches threshold. Answers are promoted directly to reusable wiki knowledge, eliminating repeated questions across sessions.
+
+**24.1.3** This section extends Section 23 (Adaptive Governance Specification Principle) and Section 22 (Persistent Knowledge Layer). It governs the flow of unresolved questions from Tier 3 to Tier 2, and from Tier 2 to the wiki.
+
+---
+
+### 24.2 Assumption Discipline
+
+**24.2.1** Not all unknowns warrant the same response. Tier 3 MUST classify every unknown before deciding whether to assume and continue or file a question and skip.
+
+**24.2.2 LOW-STAKES — Tier 3 MAY assume and proceed.** These are implementation details with no downstream dependency. If wrong, a one-file correction resolves it:
+- Variable names, function names, file names within a module
+- Code formatting and style within a module
+- Boilerplate patterns (error handler shape, log format)
+- Internal test data values and seed content
+
+**24.2.3 HIGH-STAKES — Tier 3 MUST stop-and-file a question. Do not assume.** These are decisions that, if wrong, propagate errors across multiple modules or sessions:
+- Data shapes, field names, types, or nullability
+- Interface contracts — function signatures, API endpoints, JSON schemas
+- Architectural decisions — which service owns a responsibility, where data is stored
+- Security decisions — authentication patterns, access control rules
+- Any decision requiring knowledge outside the current module's Atomic Spec
+
+**24.2.4** When Tier 3 files a question, it MUST record the provisional assumption it is using to continue working (if continuing is possible at all). If no safe assumption exists, Tier 3 MUST skip the sub-task entirely and move to the next unblocked sub-task.
+
+**24.2.5** An assumption recorded in a question file is provisional and auditable. An assumption not recorded is invisible — if incorrect, it cannot be traced, corrected, or learned from.
+
+---
+
+### 24.3 The Question File
+
+**24.3.1** Every question is stored as a separate file at `wiki/questions/<YYYY-MM-DD>-<slug>.md`. The `wiki/index.md` Questions section holds one pointer line per open question. The index is a queue pointer — it MUST NOT contain Q&A content inline.
+
+**24.3.2** A valid question file MUST contain all five elements:
+
+| Element | Content |
+|---------|---------|
+| Question | The specific question, precisely stated. Bounded answers preferred (yes/no, choose A or B). |
+| Context | What sub-task generated the question. Which module, file, or spec element is blocked. |
+| Dependency | What existing work (if any) will need to be unwound if the provisional assumption is wrong. |
+| Provisional assumption | The assumption Tier 3 is using to continue. State explicitly. If none is safe, state "No safe assumption — sub-task skipped." |
+| Status | `open` / `answered` / `promoted` |
+
+**24.3.3** Before filing a new question, Tier 3 MUST check `wiki/index.md` for an existing entity or concept page that already answers it. If one exists, the question does not need to be filed — the answer is already available. This check is a Tier 3 action at Risk Level None.
+
+**24.3.4** Once a question is answered and promoted to a wiki entity or concept page, the question file status is updated to `promoted`, the pointer is removed from `wiki/index.md` Questions section, and the question file is retained as a historical artifact — it is not deleted.
+
+---
+
+### 24.4 Trigger Rules — When to Invoke Tier 2
+
+**24.4.1** Tier 2 (Sonnet-class) is invoked to answer queued questions. The trigger is condition-based, not time-based. A fixed-interval invocation wastes cost when the queue is empty and delays answers when Tier 3 is fully blocked.
+
+**24.4.2** Invoke Tier 2 when EITHER of the following is true:
+- The open question count in `wiki/index.md` Questions section reaches **3 or more**, OR
+- Tier 3 is blocked on ALL remaining sub-tasks in the current sprint (no unblocked work remains)
+
+**24.4.3** The queue check is performed before every new sub-task. It is a Tier 3 action (read `wiki/index.md` Questions section, count open pointers). If neither trigger condition is met, Tier 3 continues without invoking Tier 2.
+
+**24.4.4** A single Tier 2 invocation MUST address ALL open questions in the queue — not just the questions that triggered the threshold. Batch answering is required. Incremental answering (one question per invocation) defeats the cost optimisation.
+
+**24.4.5** After Tier 2 answers all open questions, Tier 3 MUST re-evaluate its provisional assumptions against the answers before continuing. Sub-tasks built on incorrect provisional assumptions MUST be corrected before new sub-tasks begin.
+
+---
+
+### 24.5 Tier Assignment for Question Answering
+
+**24.5.1** Tier 2 (Sonnet-class) is the designated answering tier for mid-build questions. Tier 1 (Opus-class) is reserved for initial architecture and is NOT invoked for routine question answering.
+
+**24.5.2** Tier 1 MUST be invoked for question answering only when:
+- A question reveals an architectural contradiction (a decision already recorded in `ARCHITECTURE.md` or a prior session record is in conflict with the current build direction), OR
+- The answer requires a cross-system architectural decision that will govern multiple future sessions
+
+**24.5.3** Escalation to Tier 1 MUST be logged as a pre-action statement before invocation, citing which of the two conditions above triggered the escalation. This is the same Classification Gate requirement from §23.4.
+
+**24.5.4** Gemini Flash-class models MAY be used in place of Sonnet-class for answering low-stakes questions (§24.2.2 category only). They MUST NOT answer high-stakes questions (§24.2.3 category). If uncertain which category a question belongs to, route to Sonnet-class.
+
+---
+
+### 24.6 Knowledge Promotion — The Reuse Principle
+
+**24.6.1** Every Tier 2 answer to a high-stakes question (§24.2.3) MUST be promoted to a wiki entity or concept page. Inline answers that remain only in question files are not reusable. A question answered but not promoted will be asked again in a future session.
+
+**24.6.2** A promoted wiki page states the decision or fact as a standing rule — not as a Q&A exchange. It includes the rationale, references the originating question file, and is indexed in `wiki/index.md` under Entities or Concepts.
+
+**24.6.3** The question file is updated to `promoted` status and contains a forward link to the wiki page that now holds the canonical answer.
+
+**24.6.4** A wiki entity or concept page produced via question promotion participates in all standard wiki governance (§22): it is read at session start, can be updated by future answers, and can be cross-referenced by other entity pages. It is indistinguishable from a page produced by any other wiki workflow.
+
+---
+
+### 24.7 Cost Model
+
+**24.7.1** The protocol is designed so that Tier 2 invocations are batched and infrequent, while Tier 3 operates continuously. The expected ratio in a well-functioning workflow is one Tier 2 invocation per five to ten Tier 3 sub-tasks completed.
+
+**24.7.2** The marginal cost of a question filed but answered later is zero if Tier 3 can continue on other sub-tasks. The rework cost of an incorrect high-stakes assumption is materially higher than the cost of one Tier 2 invocation. The protocol is cost-positive whenever it prevents even one multi-file rework event.
+
+**24.7.3** Projects implementing §24 MUST log Tier 2 Q-queue invocations in SESSION_LOG.md. Record: questions answered count, sub-tasks unblocked, provisional assumptions corrected.
+
+---
+
+### 24.8 Relationship to Prior AAO Sections
+
+**24.8.1** Section 24 extends Section 23 (Adaptive Governance Specification Principle). The tier definitions, Classification Gate, and Atomic Spec requirements of §23 apply without modification. §24 adds the question queue mechanism to the Tier 3 build workflow.
+
+**24.8.2** Section 24 extends Section 22 (Persistent Knowledge Layer). The wiki question file pattern in §22 is the storage mechanism for §24. All wiki governance rules apply to question files and promoted entity/concept pages.
+
+**24.8.3** The Watchdog Protocol (§23.6) and the Question Queue Protocol (§24) are complementary. The Watchdog reviews completed module output; the Question Queue resolves blockers during module construction. Both operate within the same build session without conflict.
+
+---
+
+### 24.9 Compliance Classification
+
+**24.9.1** Section 24 is a **Level 2 operational extension** to AAO. It is not required for Level 1 core compliance. It is REQUIRED for any project claiming Tier-Governed AAO compliance (§23.9.2) that also operates a wiki-enabled knowledge layer (§22).
+
+**24.9.2** Projects claiming **Queue-Governed Build** compliance MUST satisfy all of the following:
+- Assumption discipline (§24.2) applied before every Tier 3 unknown decision
+- Question files conform to the five-element structure (§24.3.2) for every filed question
+- Wiki index checked before every new question is filed (§24.3.3)
+- Tier 2 invoked on threshold trigger, not fixed timer (§24.4.2)
+- All Tier 2 answers to high-stakes questions promoted to wiki entity or concept pages (§24.6.1)
+- Tier 2 Q-queue invocations logged in SESSION_LOG.md (§24.7.3)
+
+---
+
+*Section 24 authored: Donald Moskaluk, AtMyBoat.com, AAO v2.0, 2026-05-29.*
+
+---
+
+*AAO Specification v2.0 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v2.0 adds Section 24: Multi-Tier Question Queue Protocol — assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion*
 *v1.9 adds Section 23: Adaptive Governance Specification Principle — Three-Tier Agentic Model, Atomic Spec, Watchdog Protocol*
 *v1.8 adds Section 19.8: Extended Data Collection Fields for Research Datasets*
 *v1.7 adds Section 22: Persistent Knowledge Layer — LLM-Wiki Integration*
