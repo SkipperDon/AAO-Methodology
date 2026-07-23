@@ -347,6 +347,7 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 
 | Version | Date | Key Addition |
 |---------|------|-------------|
+| 2.1 | 2026-07-23 | Section 25 — Tier Escalation & Verification Protocol. Structured escalation contract (🔺 block), confidence-gated forced stop, per-spec ESCALATE-IF list, adversarial verification pass (distinct from §23.6 Watchdog), escalate-vs-substitute tie-breaker (§25.5.1a) and known-limitation pre-approval (§25.5.2). |
 | 1.9 | 2026-05-14 | Adaptive Governance Specification Principle — Three-Tier Agentic Model (Architect/Spec Writer/Implementer), Atomic Spec handover contract, Watchdog protocol, provider-agnostic AI Model Classification Gate with minimum capability thresholds. Telemetry field `task_classification` added to extended data. |
 | 1.8 | 2026-04-26 | Section 19.8 — Extended Data Collection Fields for Research Datasets. Adds `session_duration_min`, `tasks_planned`, `tasks_completed`, `governing_doc_version`, `attributed_rec`, `failure_category`, `human_verified` to session-close workflow. Enables H1–H5 hypothesis testing from SQS panel data. |
 | 1.7 | 2026-04-17 | Section 22 — Persistent Knowledge Layer (LLM-Wiki Integration). Four conflict resolutions. |

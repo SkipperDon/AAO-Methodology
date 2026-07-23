@@ -2285,8 +2285,106 @@ TASK TYPE: [ARCHITECT] — Tier 1. Reason: [one sentence justifying escalation].
 
 ---
 
-*AAO Specification v2.0 | © 2026 Donald Moskaluk | AtMyBoat.com*
+## 25. TIER ESCALATION & VERIFICATION PROTOCOL
+
+### 25.1 Purpose and Scope
+
+**25.1.1** Section 23 defines the three tiers and the Atomic Spec handover. Section 24 defines how unresolved questions flow upward via a wiki question file. Section 25 adds the two mechanisms those sections leave unspecified: (a) a structured escalation contract by which a lower tier requests clarification, advice, or a solution *at the moment it becomes uncertain*, and (b) an adversarial verification pass by which the higher tier confirms the lower tier's output is correct — not merely aligned in intent.
+
+**25.1.2** The objective is to let a low-cost implementer (Tier 3) do the mechanical work while a capable model (Tier 1/2) guarantees quality, without the implementer silently shipping plausible-but-wrong output.
+
+**25.1.3** Section 25 extends §23 (tiers, Atomic Spec, Watchdog) and §24 (question queue). It does not modify the tier definitions or the Classification Gate.
+
+### 25.2 The Failure Mode Addressed
+
+**25.2.1** A lower-capability model's primary risk is overconfidence: it does not reliably detect its own uncertainty, so it fills gaps with plausible defaults and proceeds. The §24 question file mitigates this but is neither triggered at a defined threshold nor delivered in a fixed format. Section 25 makes escalation mandatory at a confidence threshold and gives it a fixed message format.
+
+### 25.3 Communication Topology
+
+**25.3.1** Model-to-model communication is *live* only when a higher tier orchestrates the lower tier within one session (structured return value, automatic re-dispatch). When the lower tier runs in a separate session, the channel is *asynchronous and file-mediated* (the §24 question file), with the operator relaying.
+
+**25.3.2** Both topologies use the same escalation message format (§25.4). Asynchronous/file-mediated is the default for separated sessions; live orchestration is used when its higher cost is justified.
+
+### 25.4 The Escalation Contract
+
+**25.4.1** When a lower tier must escalate, it emits exactly this block and stops:
+
+```
+🔺 ESCALATION — <task id>
+Tier asking     : <model / tier>
+Type            : [CLARIFICATION | ADVICE | SOLUTION-REQUEST]
+Blocking?       : [BLOCKED | PROCEEDING on assumption below]
+Question        : <one specific, bounded question>
+Why it blocks   : <what changes depending on the answer>
+Options I see   : (1) ...  (2) ...
+My provisional  : <best guess> — Confidence: NN/100
+If I'm wrong    : <consequence>
+```
+
+**25.4.2** Escalation types:
+- **CLARIFICATION** — a missing fact (path, key, name). Answered in one line.
+- **ADVICE** — a judgment between viable approaches. Higher tier recommends, with reasoning.
+- **SOLUTION-REQUEST** — the sub-task exceeds the lower tier's reliable capability. The higher tier authors that portion; the lower tier integrates it.
+
+### 25.5 Forced-Stop Triggers
+
+**25.5.1** Before writing code for each sub-task, the lower tier computes the Confidence Score. It MUST emit an escalation block instead of writing code when **either**: (a) Confidence < 75 (AMBER/RED); or (b) any Clarification Gate condition is true — missing business rule, undefined scope boundary, contradictory requirements, unconfirmed data contract, undefined success condition, or irreversible-and-ambiguous target. This inverts the default: silence-and-guess is prohibited.
+
+#### 25.5.1a Escalate-vs-Substitute Tie-Breaker
+
+When an ESCALATE-IF trigger fires, escalation is the default. A lower tier MAY substitute a workaround **only** when all three hold: (1) the workaround verifies the *same assertion* the spec required (not a weaker proxy); (2) it is transparently logged in the Decision Log; (3) it is non-destructive and reversible (touches no additional files or system state). If any fails, the lower tier MUST escalate. Even when a substitution is permitted, the higher tier's verification pass (§25.8) MUST independently confirm the substitute was sound; a substitute that the higher tier cannot independently validate is treated as a failed verification, not a pass.
+
+#### 25.5.2 Known-Limitation Pre-Approval
+
+Where a substitution recurs from a *known, permanent* environment constraint (e.g. browser/test dependencies unavailable in the Tier-3 environment), the spec author SHOULD pre-declare it in the Atomic Spec: state the constraint, the approved substitute (which must still test the same assertion and produce the real deliverable for later use), and that no escalation is required for that specific case. This removes redundant escalations for a constraint already understood, while all other ESCALATE-IF triggers remain in force.
+
+### 25.6 Per-Spec ESCALATE-IF List
+
+**25.6.1** Because a low-capability model's self-assessment of uncertainty is itself unreliable, every Atomic Spec produced for a lower tier MUST include a concrete, checkable ESCALATE-IF list mapping specific conditions to escalation types (e.g. "if the target file is not exactly X → CLARIFICATION"). Concrete triggers do not depend on the model's self-assessment.
+
+### 25.7 Quality Levers
+
+**25.7.1** In priority order, most quality is secured *before* the lower tier runs: (1) **spec richness** — the interface contract (exact paths, signatures, shapes) and the failing test (an executable definition of done) are the two largest ambiguity killers; (2) **forced stop** (§25.5); (3) **asking is free, guessing is costly** — a well-formed escalation carries zero penalty, a silent wrong assumption is a UAC event; (4) **pre-flight self-check** — before coding, the lower tier answers "which file / what proves done / what am I forbidden to touch" from the spec alone, escalating if it cannot; (5) **pre-partition** — the spec marks `[Tier-1 authored]` vs `[Tier-3 authored]` portions so known-subtle logic is never attempted by the lower tier.
+
+### 25.8 The Verification Pass
+
+**25.8.1** After the lower tier returns its output, the higher tier runs an adversarial verification pass — distinct from the §23.6 Watchdog (which reviews *alignment*). Verification confirms *correctness*: (1) the failing test genuinely failed before and passes after (guarding against a fixed-to-pass or trivially-passing test); (2) the diff respects the spec's constraint boundaries; (3) adversarial edge cases the spec's test may have missed; (4) no regression within scope.
+
+**25.8.2** Rationale: authoring a fix is token-expensive; verifying one is cheap. The optimal cost/quality split is therefore *low-cost model authors, capable model verifies* — obtaining higher-tier judgment on the output without paying the higher tier to produce it.
+
+**25.8.3** Hardware/on-device limit: higher-tier verification covers software only. Hardware-gated or on-device outcomes cannot be verified by reading a diff; the verification output for those is limited to a stated on-device check the operator must run. A higher tier MUST NOT claim a hardware fix works without a real test.
+
+### 25.9 The End-to-End Loop
+
+**25.9.1** Tier 1 writes the Atomic Spec (rich contract + failing test + ESCALATE-IF list) → Tier 3 runs the pre-flight self-check, then escalates or builds test-first → on escalation, the higher tier answers (clarify/advise/author the hard portion) and Tier 3 resumes → Tier 3 returns the diff, the flipped test, and a Decision Log → Tier 1 runs the verification pass → PASS advances; FAIL returns to Tier 3 with specifics.
+
+### 25.10 Tier/Model Routing
+
+**25.10.1** The cost saving of the tier model comes from *authoring*, not *execution*: running a small number of deploy/commit commands costs the same regardless of model. Route high-volume authoring, test-writing, and routine edits to the lowest capable tier; reserve the higher tier for spec-writing, the verification pass, and high-risk irreversible actions. The escalation contract is the safety net that makes the lowest tier viable; escalation on nearly every sub-task signals that specs are under-rich or the work genuinely needs a higher tier.
+
+### 25.11 Relationship to Prior AAO Sections
+
+**25.11.1** Extends §23: adds the escalation contract and the verification pass atop the Atomic Spec and Watchdog. The tier definitions and Classification Gate are unchanged.
+
+**25.11.2** Extends §24: the §24 question file is the asynchronous storage mechanism; §25 adds the forced-stop trigger, the fixed message format, and the per-spec ESCALATE-IF list.
+
+**25.11.3** The verification pass (§25.8) and the Watchdog (§23.6) are complementary: the Watchdog reviews architectural alignment; the verification pass adversarially confirms correctness.
+
+### 25.12 Compliance Classification
+
+**25.12.1** Section 25 is a **Level 2 operational extension** to AAO. It is not required for Level 1 core compliance. It is RECOMMENDED for any project running multi-tier AI implementation with a low-cost implementer tier.
+
+**25.12.2** Projects claiming **Escalation-Governed Build** compliance MUST satisfy: escalation contract (§25.4) used as the sole channel for lower-tier uncertainty; forced-stop triggers (§25.5) enforced at the confidence threshold; a concrete ESCALATE-IF list (§25.6) in every Atomic Spec; and a higher-tier verification pass (§25.8) run on every returned module before it is accepted.
+
+---
+
+*Section 25 authored: Donald Moskaluk, AtMyBoat.com, AAO v2.1, 2026-07-23 — drafted by Claude (Opus 4.8) at operator direction, hardened against the first live run (BUG-27/BUG-15/BUG-26, d3kOS).*
+
+---
+
+*AAO Specification v2.1 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v2.1 adds Section 25: Tier Escalation & Verification Protocol — structured escalation contract, confidence-gated forced stop, per-spec ESCALATE-IF, adversarial verification pass, escalate-vs-substitute tie-breaker, known-limitation pre-approval*
 *v2.0 adds Section 24: Multi-Tier Question Queue Protocol — assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion*
 *v1.9 adds Section 23: Adaptive Governance Specification Principle — Three-Tier Agentic Model, Atomic Spec, Watchdog Protocol*
 *v1.8 adds Section 19.8: Extended Data Collection Fields for Research Datasets*
