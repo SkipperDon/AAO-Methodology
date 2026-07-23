@@ -1,6 +1,6 @@
-# Tier Escalation & Verification Protocol (DRAFT — proposed AAO Section 25)
+# Tier Escalation & Verification Protocol (AAO Section 25 — PROMOTED)
 
-**Status:** DRAFT for review — not yet merged into SPECIFICATION.md
+**Status:** PROMOTED into `SPECIFICATION.md` §25 (AAO v2.1) on 2026-07-23. This draft is retained for history; the authoritative text is `SPECIFICATION.md` §25. Numbering there: forced-stop trigger = §25.5 body, escalate-vs-substitute tie-breaker = §25.5.1, known-limitation pre-approval = §25.5.2.
 **Author of draft:** Claude (Opus 4.8) at operator request, session 2026-07-23
 **Builds on:** §22 (Persistent Knowledge Layer), §23 (Adaptive Governance — Three-Tier Model, Atomic Spec, Watchdog), §24 (Multi-Tier Question Queue Protocol), Confidence Score Protocol and Clarification Gate (CLAUDE.md)
 **Compliance level:** proposed Level 2 operational extension (same tier as §23/§24)

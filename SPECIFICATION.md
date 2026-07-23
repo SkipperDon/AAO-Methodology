@@ -2328,9 +2328,9 @@ If I'm wrong    : <consequence>
 
 ### 25.5 Forced-Stop Triggers
 
-**25.5.1** Before writing code for each sub-task, the lower tier computes the Confidence Score. It MUST emit an escalation block instead of writing code when **either**: (a) Confidence < 75 (AMBER/RED); or (b) any Clarification Gate condition is true — missing business rule, undefined scope boundary, contradictory requirements, unconfirmed data contract, undefined success condition, or irreversible-and-ambiguous target. This inverts the default: silence-and-guess is prohibited.
+Before writing code for each sub-task, the lower tier computes the Confidence Score. It MUST emit an escalation block instead of writing code when **either**: (a) Confidence < 75 (AMBER/RED); or (b) any Clarification Gate condition is true — missing business rule, undefined scope boundary, contradictory requirements, unconfirmed data contract, undefined success condition, or irreversible-and-ambiguous target. This inverts the default: silence-and-guess is prohibited.
 
-#### 25.5.1a Escalate-vs-Substitute Tie-Breaker
+#### 25.5.1 Escalate-vs-Substitute Tie-Breaker
 
 When an ESCALATE-IF trigger fires, escalation is the default. A lower tier MAY substitute a workaround **only** when all three hold: (1) the workaround verifies the *same assertion* the spec required (not a weaker proxy); (2) it is transparently logged in the Decision Log; (3) it is non-destructive and reversible (touches no additional files or system state). If any fails, the lower tier MUST escalate. Even when a substitution is permitted, the higher tier's verification pass (§25.8) MUST independently confirm the substitute was sound; a substitute that the higher tier cannot independently validate is treated as a failed verification, not a pass.
 
