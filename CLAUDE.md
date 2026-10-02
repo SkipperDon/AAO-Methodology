@@ -900,6 +900,50 @@ Example: `"auth module — see wiki/entities/auth-module.md for full architectur
 
 ---
 
+## SKILLS (AAO §26 — Claude Code Skill-Based Invocation)
+
+> **What skills are:** Self-contained instruction files that load on demand via the `/` slash command. Skills separate methodology behaviours from CLAUDE.md project configuration — reducing inline duplication and version drift.
+> **Full spec:** `SPECIFICATION.md` Section 26.
+
+### Standard AAO Skills
+
+Two standard skills ship with the AAO methodology repository under `claude-code-config/skills/`. Copy them to `.claude/skills/` in your project to activate them.
+
+| Skill | Invocation | Purpose |
+|-------|-----------|---------|
+| `aao-methodology` | `/aao-methodology` | Session start/close, confidence gate, clarification gate, scope rules, quality metrics |
+| `aao-orchestration` | `/aao-orchestration` | Multi-model routing — Haiku leads, Gemini builds, Sonnet reviews, Opus consults |
+
+### Installation
+
+1. Create `.claude/skills/` at your project root.
+2. Copy `claude-code-config/skills/aao-orchestration.md` → `.claude/skills/aao-orchestration.md`.
+3. Copy `claude-code-config/skills/aao-methodology/` → `.claude/skills/aao-methodology/`.
+4. Edit `.claude/skills/aao-methodology/SKILL.md` — update the `Full spec:` path to your local clone.
+
+### Using Skills at Session Start
+
+Skills are not auto-invoked. Operators call them explicitly:
+
+```
+/aao-methodology        ← loads full AAO framework for the session
+/aao-orchestration      ← activates multi-model routing (implementation sessions)
+```
+
+To auto-load at session start, add to this CLAUDE.md:
+```
+At session start, invoke /aao-methodology before any task.
+```
+
+### AAO Compliance Checklist Addition
+
+When skills are installed, add to your session compliance checklist:
+- [ ] `/aao-methodology` invoked at session start
+- [ ] `/aao-orchestration` invoked if session includes code generation
+- [ ] Session log records which skills were active
+
+---
+
 ## PROJECT-SPECIFIC RULES
 
 ### Project Identity
