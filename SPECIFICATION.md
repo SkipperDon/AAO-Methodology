@@ -2382,8 +2382,124 @@ Where a substitution recurs from a *known, permanent* environment constraint (e.
 
 ---
 
-*AAO Specification v2.1 | © 2026 Donald Moskaluk | AtMyBoat.com*
+## 26. CLAUDE CODE SKILL-BASED INVOCATION PATTERN
+
+### 26.1 Purpose
+
+**26.1.1** This section defines the standard pattern for packaging AAO methodology elements as Claude Code skills — self-contained instruction files that load on demand via the `/` slash command system.
+
+**26.1.2** Skills separate methodology instructions from CLAUDE.md project configuration. This keeps CLAUDE.md focused on project-specific rules while methodology behaviours are activated explicitly per session, reducing inline duplication and version drift.
+
+### 26.2 Skill Architecture
+
+**26.2.1** A Claude Code skill is a markdown file with a YAML frontmatter block defining `name` and `description`, followed by the instruction body. Skills are stored in `.claude/skills/` at the project root (or in a named subdirectory if the skill requires multiple files, using `SKILL.md` as the entry point).
+
+**26.2.2** Skills are invoked by the operator using `/skill-name` (unscoped) or `/project:skill-name` (scoped to the current project directory). When invoked, the skill's instruction body is loaded into the active session as an instruction layer.
+
+**26.2.3** Skills loaded via slash command persist for the duration of the session. They do not carry over to new sessions — each session requires explicit skill activation. To make a skill load automatically, add an instruction in CLAUDE.md directing Claude to invoke it at session start.
+
+### 26.3 Standard AAO Skills
+
+**26.3.1** The AAO methodology distributes two standard skills:
+
+| Skill file | Invocation | Purpose |
+|---|---|---|
+| `aao-methodology` | `/aao-methodology` | Session start/close, confidence gate, clarification gate, scope rules, quality metrics |
+| `aao-orchestration` | `/aao-orchestration` | Multi-model routing — Haiku leads, Gemini builds, Sonnet reviews, Opus consults |
+
+**26.3.2** Both skill files are distributed in `claude-code-config/skills/` in the AAO methodology repository. Copy them to `.claude/skills/` in your project to activate them.
+
+### 26.4 aao-methodology Skill
+
+**26.4.1** This skill loads the operational AAO framework for a session. It covers:
+- Session start sequence (git status check, memory load, orientation block)
+- Bug fix workflow (log first → reproduce → classify risk → write failing test → fix → verify)
+- Confidence Gate (scoring table, thresholds, required format)
+- Clarification Gate (seven trigger conditions, question format)
+- Scope rules (Execute First, Suggest Second — §21)
+- Session close sequence (10-step mandatory sequence)
+- Standing constraints (push policy, deploy policy, API key policy)
+- OIC self-report format
+
+**26.4.2** The aao-methodology skill replaces inline AAO instruction blocks in CLAUDE.md. Projects using this skill reference it rather than duplicating methodology content inline. Inline duplication creates drift — the CLAUDE.md copy and the skill file diverge, producing contradictory instructions across sessions.
+
+**26.4.3** Activation: `/aao-methodology` or `/project:aao-methodology`.
+
+### 26.5 aao-orchestration Skill
+
+**26.5.1** This skill activates the AAO Orchestration Protocol v5.1 — a multi-model routing system for implementation sessions that optimizes cost and quality by dispatching tasks to the appropriate model tier.
+
+**26.5.2** Model dispatch table:
+
+| Task | Model | Responsibility |
+|---|---|---|
+| Orchestration Lead | Haiku | Session direction, task dispatch, doc updates, micro tasks (≤3 lines) |
+| Code Generation | Gemini 3.8 | All file edits, deployments, infrastructure code, configuration |
+| Testing | Gemini 3.8 | All test suites — pytest, Playwright, integration, database |
+| Quality Gate | Sonnet | Review Gemini output, flag correctness issues, verify constraints before merge |
+| Documentation (draft) | Gemini | First drafts: specs, runbooks, guides, solution docs |
+| Documentation (finalize) | Haiku | Integrate Gemini drafts into MEMORY.md, SESSION_LOG.md, governance files |
+| Architecture Consult | Opus | Cross-system decisions, methodological questions — 5 min max, rare |
+
+**26.5.3** Routing threshold when this skill is active:
+- **Micro** (≤3 output lines, single value substitution, no logic): Haiku executes directly — agent spawn overhead exceeds benefit at this scale
+- **All other code changes**: Route to Gemini 3.8 for generation, testing, and preliminary docs
+- **Quality gate**: Sonnet reviews before merge
+- **Architecture unknowns**: Consult Opus (5 min max per session)
+
+**26.5.4** This skill is an operational extension of §23 (Adaptive Governance Specification Principle). It implements the Three-Tier Agentic Model at the Claude Code session level: Haiku as orchestration lead (session management), Gemini as implementer (Tier 3), Sonnet as quality reviewer (Tier 2 review role).
+
+**26.5.5** Activate at the start of any implementation session with multiple files to change, or when a sprint includes code generation + testing + documentation and cost control is a priority. Skip for read-only investigation sessions or single-file micro edits.
+
+**26.5.6** Activation: `/aao-orchestration` or `/project:aao-orchestration`.
+
+### 26.6 Skill File Format
+
+**26.6.1** Every skill file MUST begin with a YAML frontmatter block:
+
+```yaml
+---
+name: skill-name
+description: >
+  One-line description shown in skill listings and the Skill tool description field.
+  Keep under 120 characters. Used by the model to decide when to invoke the skill.
+---
+```
+
+**26.6.2** The instruction body follows the frontmatter. Write it as direct instruction to the model — imperative, present tense, no preamble. The body is loaded verbatim as a session instruction layer when the skill is invoked.
+
+**26.6.3** Skills that require multiple files MUST name the entry point `SKILL.md` and use the skill name as the directory name. The frontmatter lives in `SKILL.md`.
+
+### 26.7 Installation
+
+**26.7.1** To install AAO skills in a project:
+
+1. Create `.claude/skills/` at the project root if it does not exist.
+2. Copy `claude-code-config/skills/aao-orchestration.md` → `.claude/skills/aao-orchestration.md`.
+3. Copy `claude-code-config/skills/aao-methodology/` → `.claude/skills/aao-methodology/`.
+4. Edit `.claude/skills/aao-methodology/SKILL.md` — update the `Full spec:` path to match your local clone of the methodology repo.
+5. Reference the skills in your project CLAUDE.md so operators know they exist.
+
+**26.7.2** Skills are not auto-invoked. Operators invoke them at session start. To enforce auto-load, add to CLAUDE.md:
+```
+At session start, invoke /aao-methodology before any task.
+```
+
+### 26.8 Compliance Classification
+
+**26.8.1** Section 26 is a **Level 2 operational extension** to AAO. It is not required for Level 1 core compliance. It is RECOMMENDED for any project using Claude Code as its primary AI development environment.
+
+**26.8.2** Projects claiming **Skill-Governed Session** compliance MUST satisfy: both standard skills installed and invocable; CLAUDE.md references skills rather than reproducing methodology inline; session logs record which skills were activated each session.
+
+---
+
+*Section 26 authored: Donald Moskaluk, AtMyBoat.com, AAO v2.2, 2026-10-02 — drafted by Claude Sonnet 4.6 at operator direction, based on d3kOS reference implementation (Helm-OS/.claude/skills/).*
+
+---
+
+*AAO Specification v2.2 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v2.2 adds Section 26: Claude Code Skill-Based Invocation Pattern — standard skills for AAO methodology and multi-model orchestration; skill file format, installation guide, compliance classification*
 *v2.1 adds Section 25: Tier Escalation & Verification Protocol — structured escalation contract, confidence-gated forced stop, per-spec ESCALATE-IF, adversarial verification pass, escalate-vs-substitute tie-breaker, known-limitation pre-approval*
 *v2.0 adds Section 24: Multi-Tier Question Queue Protocol — assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion*
 *v1.9 adds Section 23: Adaptive Governance Specification Principle — Three-Tier Agentic Model, Atomic Spec, Watchdog Protocol*

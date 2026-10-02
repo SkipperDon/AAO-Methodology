@@ -347,6 +347,7 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 
 | Version | Date | Key Addition |
 |---------|------|-------------|
+| 2.2 | 2026-10-02 | Section 26 — Claude Code Skill-Based Invocation Pattern. Standard skills for AAO methodology and multi-model orchestration; skill file format, installation guide, compliance classification. `claude-code-config/skills/` added with `aao-methodology` and `aao-orchestration` skill files. `claude-code-config/CLAUDE.md` updated to generic template. |
 | 2.1 | 2026-07-23 | Section 25 — Tier Escalation & Verification Protocol. Structured escalation contract (🔺 block), confidence-gated forced stop, per-spec ESCALATE-IF list, adversarial verification pass (distinct from §23.6 Watchdog), escalate-vs-substitute tie-breaker (§25.5.1) and known-limitation pre-approval (§25.5.2). |
 | 2.0 | 2026-05-29 | Section 24 — Multi-Tier Question Queue Protocol. Assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion. |
 | 1.9 | 2026-05-14 | Adaptive Governance Specification Principle — Three-Tier Agentic Model (Architect/Spec Writer/Implementer), Atomic Spec handover contract, Watchdog protocol, provider-agnostic AI Model Classification Gate with minimum capability thresholds. Telemetry field `task_classification` added to extended data. |
