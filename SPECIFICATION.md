@@ -2433,21 +2433,21 @@ Where a substitution recurs from a *known, permanent* environment constraint (e.
 
 | Task | Model | Responsibility |
 |---|---|---|
-| Orchestration Lead | Haiku | Session direction, task dispatch, doc updates, micro tasks (≤3 lines) |
+| Orchestration Lead | Sonnet | Read graft/wiki, write Gemini Specs (≤300 tokens + doc templates), verify code and docs. Declare OUTPUT TYPE on every response (see §26.9). |
 | Code Generation | Gemini 3.8 | All file edits, deployments, infrastructure code, configuration |
 | Testing | Gemini 3.8 | All test suites — pytest, Playwright, integration, database |
-| Quality Gate | Sonnet | Review Gemini output, flag correctness issues, verify constraints before merge |
-| Documentation (draft) | Gemini | First drafts: specs, runbooks, guides, solution docs |
-| Documentation (finalize) | Haiku | Integrate Gemini drafts into MEMORY.md, SESSION_LOG.md, governance files |
+| Documentation | Gemini 3.8 | SESSION_LOG entry, CHECKLIST status update, DEPLOYMENT_INDEX line — using templates provided in the Sonnet spec |
+| Code Review | Sonnet | Pass/fail verdict on Gemini code output; issues one correction directive if needed |
+| Documentation Review | Sonnet | 3-line pass/fail on Gemini's doc output; one correction directive if any section fails. Sonnet does NOT write docs from scratch. |
+| Micro Tasks | Haiku | Direct execution for ≤3 output lines, single value substitution, no logic — agent spawn overhead exceeds benefit at this scale |
 | Architecture Consult | Opus | Cross-system decisions, methodological questions — 5 min max, rare |
 
 **26.5.3** Routing threshold when this skill is active:
-- **Micro** (≤3 output lines, single value substitution, no logic): Haiku executes directly — agent spawn overhead exceeds benefit at this scale
-- **All other code changes**: Route to Gemini 3.8 for generation, testing, and preliminary docs
-- **Quality gate**: Sonnet reviews before merge
+- **Micro** (≤3 output lines, single value substitution, no logic): Haiku executes directly
+- **All other code + documentation**: Sonnet writes spec with doc templates → Gemini builds + documents → Sonnet verifies code → Sonnet reviews docs
 - **Architecture unknowns**: Consult Opus (5 min max per session)
 
-**26.5.4** This skill is an operational extension of §23 (Adaptive Governance Specification Principle). It implements the Three-Tier Agentic Model at the Claude Code session level: Haiku as orchestration lead (session management), Gemini as implementer (Tier 3), Sonnet as quality reviewer (Tier 2 review role).
+**26.5.4** This skill is an operational extension of §23 (Adaptive Governance Specification Principle). It implements the Three-Tier Agentic Model at the Claude Code session level: Sonnet as orchestration lead and verifier (Tier 2 review role), Gemini as implementer and documenter (Tier 3), Haiku for micro tasks only, Opus for architecture consultation.
 
 **26.5.5** Activate at the start of any implementation session with multiple files to change, or when a sprint includes code generation + testing + documentation and cost control is a priority. Skip for read-only investigation sessions or single-file micro edits.
 
@@ -2491,14 +2491,54 @@ At session start, invoke /aao-methodology before any task.
 
 **26.8.2** Projects claiming **Skill-Governed Session** compliance MUST satisfy: both standard skills installed and invocable; CLAUDE.md references skills rather than reproducing methodology inline; session logs record which skills were activated each session.
 
+### 26.9 Sonnet Delegation Rule
+
+**26.9.1** When Sonnet acts as orchestration lead, it MUST declare its output type on line 1 of every response. No implementation begins before the declaration.
+
+**26.9.2** The five permitted output types:
+
+| Declaration | Purpose | Token Cap |
+|---|---|---|
+| `OUTPUT TYPE: graft/wiki query` | Read codebase context before speccing. No code. | — |
+| `OUTPUT TYPE: Gemini Spec` | Scoped delegation spec: input → output → constraints → acceptance test → doc templates. No implementation code. | 300 |
+| `OUTPUT TYPE: verification` | Pass/fail verdict on Gemini code output. May quote code; writes no new implementation. | — |
+| `OUTPUT TYPE: doc review` | 3-line pass/fail on Gemini's documentation output. One correction directive if any section fails. | — |
+| `OUTPUT TYPE: operator question` | Single bounded question when genuinely blocked. Not a list of options. | — |
+
+**26.9.3** Every `Gemini Spec` for a build task MUST include a documentation section with these three templates pre-filled by Sonnet:
+
+```
+DOCS REQUIRED:
+SESSION_LOG: [date] | [task title] | Files: [list] | Outcome: [pass/fail]
+CHECKLIST: BUG-[XX] status → [FIXED/OPEN] | [one-line description]
+DEPLOYMENT_INDEX: [file path] | [description] | commit: [Gemini fills after build]
+```
+
+Gemini completes the commit hash and any unknowns after building. Sonnet's `doc review` checks accuracy — it does not rewrite.
+
+**26.9.4** Hard restrictions on Sonnet during orchestration:
+- MUST NOT write implementation code — no functions, classes, bash scripts, or SQL
+- MUST NOT write project documentation from scratch — provide templates and correction directives only
+- MUST NOT exceed 300 tokens in a Gemini Spec
+- MUST NOT ask questions answerable by reading graft/wiki
+
+**26.9.5** Enforcement mechanisms:
+1. **Pre-declaration trap** — Sonnet commits to output type on line 1. Writing code after declaring `Gemini Spec` is a visible contradiction requiring no full-response read.
+2. **Operator brake phrase** — `DELEGATION VIOLATION — discard everything after line 1. Write the Gemini Spec only.` Sonnet discards and resubmits.
+3. **Three-strike session pause** — Three violations in one session triggers operator decision on routing. Log violations in SESSION_LOG.md.
+
+**26.9.6** Cost rationale: Sonnet implementing instead of delegating costs 5–20× more than Sonnet speccing and Gemini building. Sonnet writing documentation from scratch costs 10–20× more than Sonnet reviewing Gemini's template-filled output. The pre-declaration requirement makes delegation failures visible before the response is complete.
+
 ---
 
 *Section 26 authored: Donald Moskaluk, AtMyBoat.com, AAO v2.2, 2026-10-02 — drafted by Claude Sonnet 4.6 at operator direction, based on d3kOS reference implementation (Helm-OS/.claude/skills/).*
+*Section 26.9 added: Donald Moskaluk, AtMyBoat.com, AAO v2.3, 2026-10-02 — Sonnet Delegation Rule: OUTPUT TYPE declarations, Gemini documentation ownership, doc review pattern, enforcement mechanisms.*
 
 ---
 
-*AAO Specification v2.2 | © 2026 Donald Moskaluk | AtMyBoat.com*
+*AAO Specification v2.3 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v2.3 adds §26.9: Sonnet Delegation Rule — OUTPUT TYPE pre-declarations, Gemini documentation ownership, doc review output type, enforcement mechanisms (pre-declaration trap, operator brake phrase, three-strike pause)*
 *v2.2 adds Section 26: Claude Code Skill-Based Invocation Pattern — standard skills for AAO methodology and multi-model orchestration; skill file format, installation guide, compliance classification*
 *v2.1 adds Section 25: Tier Escalation & Verification Protocol — structured escalation contract, confidence-gated forced stop, per-spec ESCALATE-IF, adversarial verification pass, escalate-vs-substitute tie-breaker, known-limitation pre-approval*
 *v2.0 adds Section 24: Multi-Tier Question Queue Protocol — assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion*
