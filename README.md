@@ -347,6 +347,7 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 
 | Version | Date | Key Addition |
 |---------|------|-------------|
+| 2.4 | 2026-10-29 | Section 27 — TokenEconomizer Integration. Experience-driven cost control companion from Microsoft Research / UC Berkeley. Micro-skills, tool pruning, failure-loop intervention. 18.4–30.9% lower mean cost on SWE-Bench. Installation, configuration, and AAO compliance checklist addition documented. |
 | 2.2 | 2026-10-02 | Section 26 — Claude Code Skill-Based Invocation Pattern. Standard skills for AAO methodology and multi-model orchestration; skill file format, installation guide, compliance classification. `claude-code-config/skills/` added with `aao-methodology` and `aao-orchestration` skill files. `claude-code-config/CLAUDE.md` updated to generic template. |
 | 2.1 | 2026-07-23 | Section 25 — Tier Escalation & Verification Protocol. Structured escalation contract (🔺 block), confidence-gated forced stop, per-spec ESCALATE-IF list, adversarial verification pass (distinct from §23.6 Watchdog), escalate-vs-substitute tie-breaker (§25.5.1) and known-limitation pre-approval (§25.5.2). |
 | 2.0 | 2026-05-29 | Section 24 — Multi-Tier Question Queue Protocol. Assumption discipline, condition-based Tier 2 trigger, reusable knowledge promotion. |
@@ -360,6 +361,35 @@ The resulting architecture — four layers, immutable base, action whitelist, au
 | 1.2 | 2026-03-19 | Section 17 — Interactive Development Mode. Git as snapshot layer. |
 | 1.1 | 2026-03-19 | Sections 12–16 — Human Sign-Off, Diversity, Decommissioning, Stakeholder Engagement. |
 | 1.0 | 2026-03-01 | Initial release — Sections 1–11, four-layer architecture. |
+
+---
+
+## Recommended Tooling — Cost Control
+
+### TokenEconomizer
+
+[TokenEconomizer](https://github.com/microsoft/TokenEconomizer) (Microsoft Research / UC Berkeley, Apache 2.0) is a black-box companion plugin that makes Claude Code cheaper to run in repositories you use often. It learns from past sessions and cuts waste in sessions that follow — without changing the agent, the model, or any AAO governance files.
+
+**Three mechanisms:**
+- **Micro-skills** — injects repository facts at session start (build commands, test spellings, required env vars) learned from past sessions
+- **Tool pruning** — stops loading tools the repository never uses, reducing per-request token overhead
+- **Failure-loop intervention** — detects repeated failures in-session and redirects before the operator needs to intervene
+
+**Measured results:** 18.4–30.9% lower mean cost across five agent–model combinations; cheaper in all 30 repository × combination cells; Pass@1 up in 4 of 5.
+
+**Install (3 commands):**
+```sh
+git clone https://github.com/microsoft/TokenEconomizer.git ~/TokenEconomizer
+claude plugin marketplace add "$HOME/TokenEconomizer"
+claude plugin install tokeneconomizer@tokeneconomizer
+```
+
+Then in Claude Code, once per machine:
+```
+/tokeneconomizer:toolprune refresh-catalog
+```
+
+Full integration guide, configuration reference, and AAO compliance checklist additions: **SPECIFICATION.md §27**.
 
 ---
 

@@ -2536,8 +2536,127 @@ Gemini completes the commit hash and any unknowns after building. Sonnet's `doc 
 
 ---
 
-*AAO Specification v2.3 | © 2026 Donald Moskaluk | AtMyBoat.com*
+## 27. TOKENECONOMIZER INTEGRATION — EXPERIENCE-DRIVEN COST CONTROL
+
+**Status:** Recommended companion tool. Black-box, non-intrusive. Works alongside AAO without modifying the agent or any AAO governance files.
+
+**Source:** Microsoft Research / UC Berkeley — Li et al. (2026). arXiv:2610.22732. Apache 2.0 license.
+**Repository:** https://github.com/microsoft/TokenEconomizer
+**Measured results:** 18.4–30.9% lower mean cost across five agent–model combinations on SWE-Bench tasks; cheaper in all 30 repository × combination cells; Pass@1 up in 4 of 5.
+
+---
+
+### 27.1 What TokenEconomizer Does
+
+TokenEconomizer learns from the sessions an agent has already run in a repository and uses that experience to cut waste in sessions that follow. It operates as a Claude Code plugin — no agent code is changed, no AAO governance files are touched. It observes sessions through standard Claude Code hooks and accumulates state in `~/.tokeneconomizer/`.
+
+Three mechanisms operate independently and are individually configurable:
+
+**27.1.1 Micro-skills — remember how the repository works**
+Sessions repeatedly rediscover the same facts: a build command that must run first, the correct spelling of a test invocation (`python -m pytest` where bare `pytest` fails), environment variables a command requires, where generated files live. Micro-skills learns such facts from two sources: failures that repeat across sessions, and a review pass every *k* sessions (*k* = 3 by default). A fact is stated at session start once three sessions confirm it, and dropped when later sessions contradict it. Off by default — activate with `/tokeneconomizer:microskills on` or `TE_MICROSKILLS_ENABLED=true`.
+
+**27.1.2 Tool pruning — stop loading tools the repository never uses**
+Every tool definition is sent with every request. A tool unused over *p* = 10 prompts across at least *m* = 2 sessions, or over *s* = 5 sessions of any length, is removed from the next session via the agent's own settings. Running `/tokeneconomizer:untool restore` restores any pruned tool instantly. On by default.
+
+**27.1.3 Failure-loop intervention — redirect stuck sessions**
+A judge model checks whether a turn is repeating the same failures. If confidence exceeds a threshold (default 0.7), the agent receives a short redirect to try another approach. If a second nudge fires, the user is informed how to interrupt. The plugin never halts a turn. On by default.
+
+---
+
+### 27.2 Relationship to AAO Governance
+
+TokenEconomizer is **additive and orthogonal** to AAO. It does not modify CLAUDE.md, does not touch session logs, does not change the risk classification or gate system. It operates entirely through Claude Code's plugin hook layer.
+
+| AAO Mechanism | TokenEconomizer Complement |
+|---|---|
+| §19 Session Quality Metrics (cost tracking) | Tool pruning and micro-skills reduce base session cost, improving cost efficiency metric |
+| §23 Three-Tier Agentic Model (Tier 3 cost cap) | Tool pruning removes unused tools from Tier 3 Gemini sessions, reducing per-call token overhead |
+| §26 Skill-Based Invocation | TokenEconomizer operates as a separate plugin layer — no conflict with AAO skills |
+| §8 Failure Intelligence System | Loop guard complements AAO failure detection by providing real-time in-session intervention |
+| §17 Interactive Development Mode | Micro-skills can encode repository-specific facts (deploy paths, test commands) that would otherwise be rediscovered each session |
+
+The failure-loop intervention mechanism is particularly relevant to AAO §8: where AAO's Failure Intelligence System records failures for post-session analysis and future prevention, TokenEconomizer's loop guard provides in-session intervention, reducing wasted turns before the operator needs to intervene.
+
+---
+
+### 27.3 Installation
+
+**Requirements:** Python 3.10+, Claude Code 2.1.300+ (tested to 2.1.310; newer versions not formally tested but no known incompatibilities as of 2026-10-29).
+
+```sh
+# Step 1 — Clone (keep the clone in place; the plugin runs from it)
+git clone https://github.com/microsoft/TokenEconomizer.git ~/TokenEconomizer
+
+# Step 2 — Register the marketplace
+claude plugin marketplace add "$HOME/TokenEconomizer"
+
+# Step 3 — Install the plugin (user scope — applies to all projects)
+claude plugin install tokeneconomizer@tokeneconomizer
+```
+
+**After install — run once per machine, and again after each Claude Code update:**
+
+Open Claude Code in any repository and run:
+```
+/tokeneconomizer:toolprune refresh-catalog
+```
+This records the full tool catalog so pruning has a complete baseline. Run it in each major repository you work in.
+
+**Verify installation:**
+```
+/tokeneconomizer:status
+```
+
+---
+
+### 27.4 Configuration
+
+Settings can be changed inside Claude Code with `/tokeneconomizer:config set <key> <value>` or via environment variable `TE_<KEY>` (uppercased, dots replaced with underscores).
+
+| Setting | Default | Description |
+|---|---|---|
+| `microskills.enabled` | `false` | Activate micro-skills learning |
+| `microskills.propose_every` | `3` | Sessions between review passes |
+| `toolprune.enabled` | `true` | Activate tool pruning |
+| `toolprune.evidence` | `10` | Unused prompts before pruning |
+| `toolprune.min_sessions` | `2` | Minimum sessions required |
+| `loopguard.enabled` | `true` | Activate failure-loop intervention |
+| `loopguard.judge_confidence` | `0.7` | Confidence threshold to trigger redirect |
+| `loopguard.nudges` | `1` | Maximum redirects before user alert |
+
+**Recommended AAO configuration** — enable micro-skills to capture repository-specific facts that complement AAO session knowledge:
+```
+/tokeneconomizer:config set microskills.enabled true
+```
+
+---
+
+### 27.5 Updating
+
+```sh
+cd ~/TokenEconomizer && git pull
+```
+
+---
+
+### 27.6 AAO Compliance Checklist Addition
+
+When TokenEconomizer is installed, add to session compliance tracking:
+
+- [ ] `/tokeneconomizer:status` checked at session start (Risk Level None)
+- [ ] `/tokeneconomizer:toolprune refresh-catalog` run after any Claude Code update
+- [ ] Tool pruning catalog reviewed if an expected tool appears missing from a session
+- [ ] Loop guard notices acted on — redirect accepted or operator interrupts the session
+
+---
+
+*Section 27 authored: Donald Moskaluk, AtMyBoat.com, AAO v2.4, 2026-10-29 — drafted by Claude Sonnet 4.6 at operator direction. TokenEconomizer by Li et al., Microsoft Research / UC Berkeley, arXiv:2610.22732, Apache 2.0.*
+
+---
+
+*AAO Specification v2.4 | © 2026 Donald Moskaluk | AtMyBoat.com*
 *License: Apache 2.0*
+*v2.4 adds Section 27: TokenEconomizer Integration — experience-driven cost control companion; micro-skills, tool pruning, failure-loop intervention; installation, configuration, AAO compliance checklist addition*
 *v2.3 adds §26.9: Sonnet Delegation Rule — OUTPUT TYPE pre-declarations, Gemini documentation ownership, doc review output type, enforcement mechanisms (pre-declaration trap, operator brake phrase, three-strike pause)*
 *v2.2 adds Section 26: Claude Code Skill-Based Invocation Pattern — standard skills for AAO methodology and multi-model orchestration; skill file format, installation guide, compliance classification*
 *v2.1 adds Section 25: Tier Escalation & Verification Protocol — structured escalation contract, confidence-gated forced stop, per-spec ESCALATE-IF, adversarial verification pass, escalate-vs-substitute tie-breaker, known-limitation pre-approval*
